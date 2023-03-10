@@ -1,5 +1,5 @@
 agents:
-  queue: <%- prodBuildkiteQueueName %>
+  queue: b:cicd
 
 configs:
   plugins:
@@ -65,7 +65,7 @@ steps:
     timeout_in_minutes: 10
 
   - agents:
-      queue: <%- devBuildkiteQueueName %>
+      queue: a:cicd
     branches: '!renovate-*'
     label: 🧖‍♀️ Warm Dev
     command: ':'
@@ -80,7 +80,7 @@ steps:
 
   - <<: *deploy
     agents:
-      queue: <%- devBuildkiteQueueName %>
+      queue: a:cicd
     env:
       ENVIRONMENT: dev
     concurrency_group: raph-monkey/deploy/dev

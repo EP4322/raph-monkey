@@ -22,7 +22,7 @@ const configs: Record<Environment, () => Omit<Config, 'environment'>> = {
   local: () => ({
     logLevel: 'debug',
     metrics: false,
-    name: '<%- serviceName %>',
+    name: 'raph-monkey',
     version: 'local',
 
     destinationSnsTopicArn: 'arn:aws:sns:us-east-2:123456789012:destination',

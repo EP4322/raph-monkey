@@ -4,7 +4,6 @@ import { SQSEvent } from 'aws-lambda';
 
 import { createHandler } from 'src/framework/handler';
 import { logger } from 'src/framework/logging';
-import { metricsClient } from 'src/framework/metrics';
 import { validateJson } from 'src/framework/validation';
 import { scoreJobPublishedEvent, scoringService } from 'src/services/jobScorer';
 import { sendPipelineEvent } from 'src/services/pipelineEventSender';
@@ -32,8 +31,6 @@ export const handler = createHandler<SQSEvent>(async (event) => {
 
   logger.info({ count }, 'Received jobs');
 
-  metricsClient.distribution('job.received', event.Records.length);
-
   const record = event.Records[0];
 
   // TODO: this throws an error, which will cause the Lambda function to retry
@@ -47,6 +44,4 @@ export const handler = createHandler<SQSEvent>(async (event) => {
   const snsMessageId = await sendPipelineEvent(scoredJob);
 
   logger.info({ snsMessageId }, 'Scored job');
-
-  metricsClient.distribution('job.scored', 1);
 });

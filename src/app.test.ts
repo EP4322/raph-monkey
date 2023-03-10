@@ -1,6 +1,5 @@
 import { PublishCommand } from '@aws-sdk/client-sns';
 
-import { metricsClient } from 'src/framework/metrics';
 import { createCtx, createSqsEvent } from 'src/testing/handler';
 import { logger } from 'src/testing/logging';
 import { scoringService, sns } from 'src/testing/services';
@@ -19,10 +18,6 @@ describe('handler', () => {
 
   const score = chance.floating({ max: 1, min: 0 });
 
-  const distribution = jest
-    .spyOn(metricsClient, 'distribution')
-    .mockReturnValue();
-
   beforeAll(logger.spy);
   beforeAll(scoringService.spy);
 
@@ -33,7 +28,6 @@ describe('handler', () => {
 
   afterEach(() => {
     logger.clear();
-    distribution.mockClear();
     scoringService.clear();
     sns.clear();
   });
@@ -51,11 +45,6 @@ describe('handler', () => {
       [{ count: 1 }, 'Received jobs'],
       [{ snsMessageId: expect.any(String) }, 'Scored job'],
       ['Function succeeded'],
-    ]);
-
-    expect(distribution.mock.calls).toEqual([
-      ['job.received', 1],
-      ['job.scored', 1],
     ]);
 
     expect(sns.client).toReceiveCommandTimes(PublishCommand, 1);

@@ -1,6 +1,3 @@
-import { datadog } from 'datadog-lambda-js';
-
-import { config } from 'src/config';
 import { logger, loggerContext } from 'src/framework/logging';
 
 interface LambdaContext {
@@ -21,7 +18,7 @@ const withDatadog = <Event, Output = unknown>(
   fn: Handler<Event, Output>,
 ): Handler<Event, Output> =>
   // istanbul ignore next
-  config.metrics ? (datadog(fn) as Handler<Event, Output>) : fn;
+  fn;
 
 export const createHandler = <Event, Output = unknown>(
   fn: (event: Event) => Promise<Output>,

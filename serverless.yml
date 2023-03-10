@@ -1,11 +1,10 @@
-service: <%- serviceName %>
+service: raph-monkey
 
 configValidationMode: error
 
 params:
   default:
-    datadogApiKeySecretArn: 'TODO: arn:aws:secretsmanager:${aws:region}:${aws:accountId}:secret:SECRET-NAME'
-    description: <%- description %>
+    description: A serverless slackbot
   dev:
     deploymentBucket: 'TODO: deployment-bucket-name'
     isProduction: false
@@ -14,23 +13,12 @@ params:
     isProduction: true
 
 custom:
-  datadog:
-    addLayers: false
-    apiKeySecretArn: ${param:datadogApiKeySecretArn}
-    enableDDLogs: false
-    # TODO: enable Datadog extension
-    enabled: false
-    exclude:
-      - WorkerPreHook
-    injectLogContext: false
-    version: ${env:VERSION}
   prune:
     automatic: true
     number: 3
 
 plugins:
   - serverless-plugin-canary-deployments
-  - serverless-plugin-datadog
   - serverless-prune-plugin
 
 provider:
@@ -61,9 +49,6 @@ provider:
         - Action: lambda:InvokeFunction
           Effect: Allow
           Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:functions.Worker.name}
-        - Action: secretsmanager:GetSecretValue
-          Effect: Allow
-          Resource: ${param:datadogApiKeySecretArn}-??????
         - Action: sns:Publish
           Effect: Allow
           Resource: !Ref DestinationTopic
@@ -104,9 +89,7 @@ functions:
 
       DESTINATION_SNS_TOPIC_ARN: !Ref DestinationTopic
     events:
-      - sqs:
-          arn: !GetAtt MessageQueue.Arn
-          batchSize: 1
+      - httpApi: 'POST /invoke'
   WorkerPreHook:
     name: ${self:functions.Worker.name}-pre-hook
     handler: lib/hooks.pre
@@ -119,84 +102,3 @@ functions:
 resources:
   # This becomes the Lambda application's description
   Description: ${param:description}
-
-  Resources:
-    DeadLetterQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        MessageRetentionPeriod: 1209600
-        KmsDataKeyReusePeriodSeconds: 300
-        KmsMasterKeyId: !Ref EncryptionKey
-        QueueName: ${self:service}-dead-letters
-
-    MessageQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        MessageRetentionPeriod: 1209600
-        KmsDataKeyReusePeriodSeconds: 300
-        KmsMasterKeyId: !Ref EncryptionKey
-        QueueName: ${self:service}-messages
-        RedrivePolicy:
-          deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
-          maxReceiveCount: 3
-        VisibilityTimeout: 180
-
-    # MessageQueuePolicy:
-    #   Type: AWS::SQS::QueuePolicy
-    #   Properties:
-    #     PolicyDocument:
-    #       Version: '2012-10-17'
-    #       Statement:
-    #         - Action: sqs:SendMessage
-    #           Condition:
-    #             ArnEquals:
-    #               aws:SourceArn: 'TODO: sourceSnsTopicArn'
-    #           Effect: 'Allow'
-    #           Principal:
-    #             AWS: '*'
-    #           Resource: '*'
-    #     Queues:
-    #       - !Ref MessageQueue
-
-    # TopicSubscription:
-    #   Type: AWS::SNS::Subscription
-    #   Properties:
-    #     Endpoint: !GetAtt MessageQueue.Arn
-    #     Protocol: sqs
-    #     RawMessageDelivery: true
-    #     TopicArn: 'TODO: sourceSnsTopicArn'
-
-    DestinationTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-        KmsMasterKeyId: alias/aws/sns
-        TopicName: ${self:service}
-
-    EncryptionKey:
-      Type: AWS::KMS::Key
-      Properties:
-        Description: ${self:service}
-        EnableKeyRotation: true
-        KeyPolicy:
-          Version: '2012-10-17'
-          Statement:
-            - Sid: Admin access
-              Effect: Allow
-              Action: kms:*
-              Principal:
-                AWS: !Ref AWS::AccountId
-              Resource: '*'
-            - Sid: SNS compatibility
-              Effect: Allow
-              Action:
-                - kms:Decrypt
-                - kms:GenerateDataKey*
-              Principal:
-                Service: sns.amazonaws.com
-              Resource: '*'
-
-    EncryptionKeyAlias:
-      Type: AWS::KMS::Alias
-      Properties:
-        AliasName: alias/seek/${self:service}
-        TargetKeyId: !Ref EncryptionKey
