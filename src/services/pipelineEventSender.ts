@@ -1,7 +1,5 @@
 import { PublishCommand } from '@aws-sdk/client-sns';
 
-import { config } from 'src/config';
-
 import { sns } from './aws';
 
 export const sendPipelineEvent = async (
@@ -21,7 +19,7 @@ export const sendPipelineEvent = async (
           },
         },
       }),
-      TopicArn: config.destinationSnsTopicArn,
+      TopicArn: 'Blah',
     }),
   );
 

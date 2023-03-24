@@ -6,10 +6,8 @@ params:
   default:
     description: A serverless slackbot
   dev:
-    deploymentBucket: 'TODO: deployment-bucket-name'
     isProduction: false
   prod:
-    deploymentBucket: 'TODO: deployment-bucket-name'
     isProduction: true
 
 custom:
@@ -30,10 +28,6 @@ provider:
   deploymentMethod: direct
   stackName: ${self:service}
   stage: ${env:ENVIRONMENT}
-  deploymentBucket:
-    # Use a shared account-level bucket for Lambda bundles and other artefacts.
-    # This is easier to manage in terms of access, deployment, and tagging.
-    name: ${param:deploymentBucket}
   environment:
     NODE_ENV: production
     # https://nodejs.org/api/cli.html#cli_node_options_options
@@ -41,17 +35,9 @@ provider:
   iam:
     role:
       statements:
-        - Action:
-            - kms:Decrypt
-            - kms:GenerateDataKey*
-          Effect: Allow
-          Resource: !GetAtt EncryptionKey.Arn
         - Action: lambda:InvokeFunction
           Effect: Allow
           Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:functions.Worker.name}
-        - Action: sns:Publish
-          Effect: Allow
-          Resource: !Ref DestinationTopic
   stackTags:
     # TODO: add data classification tags
     # https://rfc.skinfra.xyz/RFC019-AWS-Tagging-Standard.html#seekdataconsumers
@@ -87,7 +73,6 @@ functions:
       SERVICE: ${self:service}
       VERSION: ${env:VERSION, 'local'}
 
-      DESTINATION_SNS_TOPIC_ARN: !Ref DestinationTopic
     events:
       - httpApi: 'POST /invoke'
   WorkerPreHook:
