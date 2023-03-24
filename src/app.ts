@@ -15,8 +15,11 @@ import { createHandler } from 'src/framework/handler';
 
 export const handler = createHandler<APIGatewayProxyEventV2>(
   // eslint-disable-next-line @typescript-eslint/require-await
-  async (_event) => ({
-    statusCode: 200,
-    body: 'Hello World!',
-  }),
+  async (event) => {
+    console.log(event);
+    return {
+      statusCode: 200,
+      body: 'Ha Lumi!',
+    };
+  },
 );

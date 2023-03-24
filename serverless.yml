@@ -14,10 +14,14 @@ custom:
   prune:
     automatic: true
     number: 3
+  esbuild:
+    sourcemap: true
 
 plugins:
+  - serverless-esbuild
   - serverless-plugin-canary-deployments
   - serverless-prune-plugin
+  - serverless-offline
 
 provider:
   logRetentionInDays: 30
@@ -50,16 +54,10 @@ provider:
     seek:source:sha: ${env:BUILDKITE_COMMIT, 'na'}
     seek:source:url: 'https://github.com/SEEK-Jobs/raph-monkey'
 
-package:
-  patterns:
-    - '!**'
-    - lib/**
-    - node_modules/**
-
 functions:
   Worker:
     name: ${self:service}
-    handler: lib/app.handler
+    handler: src/app.handler
     description: ${param:description}
     memorySize: 128
     reservedConcurrency: 20
