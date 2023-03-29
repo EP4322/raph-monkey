@@ -108,10 +108,11 @@ use with caution and always follow up with a proper revert or fix in Git history
 
 ### Dev
 
-To run locally: 
+```To run locally: 
 Start ngrok: ngrok http 3000
 awsauth to apac-sandbox
 Start serverless: ENVIRONMENT=dev serverless offline start --reloadHandler
+```
 
 <!--
 - CloudWatch dashboard
