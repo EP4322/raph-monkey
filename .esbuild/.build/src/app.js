@@ -18652,6 +18652,7 @@ __export(app_exports, {
 });
 module.exports = __toCommonJS(app_exports);
 var import_register = __toESM(require_register());
+var import_querystring = __toESM(require("querystring"));
 
 // src/framework/logging.ts
 var import_async_hooks = require("async_hooks");
@@ -18725,19 +18726,19 @@ var handler = createHandler(
   // eslint-disable-next-line @typescript-eslint/require-await
   async (event) => {
     console.log(event.body);
-    const regex = /text=([a-z]{5})&api_app/m;
-    if (event.body !== void 0) {
-      const wordInput = event.body.match(regex);
-      if (wordInput !== null) {
-        return {
-          statusCode: 200,
-          body: wordInput[1]
-        };
-      }
+    if (event.body === void 0) {
+      return {
+        statusCode: 400,
+        body: "Not a valid request"
+      };
     }
+    const slackObject = import_querystring.default.parse(
+      event.body
+    );
+    console.log(slackObject.text);
     return {
       statusCode: 200,
-      body: "Not a valid wordle word"
+      body: "Hello"
     };
   }
 );
