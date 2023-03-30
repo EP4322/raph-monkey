@@ -18724,10 +18724,20 @@ var createHandler = (fn) => withDatadog(
 var handler = createHandler(
   // eslint-disable-next-line @typescript-eslint/require-await
   async (event) => {
-    console.log(event);
+    console.log(event.body);
+    const regex = /text=([a-z]{5})&api_app/m;
+    if (event.body !== void 0) {
+      const wordInput = event.body.match(regex);
+      if (wordInput !== null) {
+        return {
+          statusCode: 200,
+          body: wordInput[1]
+        };
+      }
+    }
     return {
       statusCode: 200,
-      body: "Ha Lumi!"
+      body: "Not a valid wordle word"
     };
   }
 );
