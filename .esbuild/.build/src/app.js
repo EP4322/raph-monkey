@@ -18722,6 +18722,28 @@ var createHandler = (fn) => withDatadog(
 );
 
 // src/app.ts
+var checkWordLength = (inputWord) => {
+  const splitInput = inputWord.split(" ");
+  if (splitInput[0] === "guess" && splitInput[1].length === 5 && splitInput.length === 2) {
+    return { status: 200, result: splitInput[1] };
+  }
+  if (splitInput[0] === "create" && splitInput[1].length === 5 && splitInput.length === 2) {
+    return { status: 200, result: "Wordle Created Successfully" };
+  }
+  if (splitInput[0] === "start" && splitInput.length === 1) {
+    return { status: 200, result: "Wordle Started Successfully" };
+  }
+  if (splitInput[0] === "help" && splitInput.length === 1) {
+    return {
+      status: 200,
+      result: 'Use command "start" to begin todays wordle or "guess <word>" to make a wordle guess'
+    };
+  }
+  return {
+    status: 200,
+    result: 'Not a valid command, use "help" for valid commands'
+  };
+};
 var handler = createHandler(
   // eslint-disable-next-line @typescript-eslint/require-await
   async (event) => {
@@ -18736,9 +18758,10 @@ var handler = createHandler(
       event.body
     );
     console.log(slackObject.text);
+    const { status, result } = checkWordLength(slackObject.text);
     return {
-      statusCode: 200,
-      body: "Hello"
+      statusCode: status,
+      body: result
     };
   }
 );
