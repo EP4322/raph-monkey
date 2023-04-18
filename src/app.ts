@@ -30,14 +30,17 @@ interface SlashCommand {
   trigger_id: string;
 }
 
-const checkWordLength = (inputWord: string) => {
-  const splitInput = inputWord.split(' ');
+const checkInput = (inputCommand: string) => {
+  const splitInput = inputCommand.split(' ');
   if (
     splitInput[0] === 'guess' &&
     splitInput[1].length === 5 &&
     splitInput.length === 2
   ) {
-    return { status: 200, result: splitInput[1] };
+    return {
+      status: 200,
+      result: '`'.concat(splitInput[1], ':`', wordleReturn(splitInput[1])),
+    };
   }
 
   if (
@@ -66,6 +69,38 @@ const checkWordLength = (inputWord: string) => {
   };
 };
 
+const wordleReturn = (guess: string) => {
+  const sampleTarget = 'sound';
+  const incorrect = ':black_circle: ';
+  const defaultResponse = [
+    incorrect,
+    incorrect,
+    incorrect,
+    incorrect,
+    incorrect,
+  ];
+
+  let uiOutput = '';
+  let correctLetter = '';
+  for (let i = 0; i < 5; i++) {
+    if (sampleTarget[i] === guess[i]) {
+      defaultResponse[i] = ':large_green_circle: ';
+      correctLetter += guess[i];
+    }
+  }
+
+  for (let i = 0; i < 5; i++) {
+    if (sampleTarget.includes(guess[i])) {
+      if (!correctLetter.includes(guess[i])) {
+        defaultResponse[i] = ':large_yellow_circle: ';
+        correctLetter += guess[i];
+      }
+    }
+    uiOutput += defaultResponse[i];
+  }
+  return uiOutput;
+};
+
 export const handler = createHandler<APIGatewayProxyEventV2>(
   // eslint-disable-next-line @typescript-eslint/require-await
   async (event) => {
@@ -81,7 +116,7 @@ export const handler = createHandler<APIGatewayProxyEventV2>(
       event.body,
     ) as unknown as SlashCommand;
     console.log(slackObject.text);
-    const { status, result } = checkWordLength(slackObject.text);
+    const { status, result } = checkInput(slackObject.text);
 
     return {
       statusCode: status,

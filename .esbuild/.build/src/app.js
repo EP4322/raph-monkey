@@ -18722,10 +18722,13 @@ var createHandler = (fn) => withDatadog(
 );
 
 // src/app.ts
-var checkWordLength = (inputWord) => {
-  const splitInput = inputWord.split(" ");
+var checkInput = (inputCommand) => {
+  const splitInput = inputCommand.split(" ");
   if (splitInput[0] === "guess" && splitInput[1].length === 5 && splitInput.length === 2) {
-    return { status: 200, result: splitInput[1] };
+    return {
+      status: 200,
+      result: "`".concat(splitInput[1], ":`", wordleReturn(splitInput[1]))
+    };
   }
   if (splitInput[0] === "create" && splitInput[1].length === 5 && splitInput.length === 2) {
     return { status: 200, result: "Wordle Created Successfully" };
@@ -18744,6 +18747,35 @@ var checkWordLength = (inputWord) => {
     result: 'Not a valid command, use "help" for valid commands'
   };
 };
+var wordleReturn = (guess) => {
+  const sampleTarget = "sound";
+  const incorrect = ":black_circle: ";
+  const defaultResponse = [
+    incorrect,
+    incorrect,
+    incorrect,
+    incorrect,
+    incorrect
+  ];
+  let uiOutput = "";
+  let correctLetter = "";
+  for (let i = 0; i < 5; i++) {
+    if (sampleTarget[i] === guess[i]) {
+      defaultResponse[i] = ":large_green_circle: ";
+      correctLetter += guess[i];
+    }
+  }
+  for (let i = 0; i < 5; i++) {
+    if (sampleTarget.includes(guess[i])) {
+      if (!correctLetter.includes(guess[i])) {
+        defaultResponse[i] = ":large_yellow_circle: ";
+        correctLetter += guess[i];
+      }
+    }
+    uiOutput += defaultResponse[i];
+  }
+  return uiOutput;
+};
 var handler = createHandler(
   // eslint-disable-next-line @typescript-eslint/require-await
   async (event) => {
@@ -18758,7 +18790,7 @@ var handler = createHandler(
       event.body
     );
     console.log(slackObject.text);
-    const { status, result } = checkWordLength(slackObject.text);
+    const { status, result } = checkInput(slackObject.text);
     return {
       statusCode: status,
       body: result
