@@ -1280,7 +1280,7 @@ var require_atomic_sleep = __commonJS({
 var require_sonic_boom = __commonJS({
   "node_modules/pino/node_modules/sonic-boom/index.js"(exports, module2) {
     "use strict";
-    var fs = require("fs");
+    var fs2 = require("fs");
     var EventEmitter = require("events");
     var inherits = require("util").inherits;
     var path = require("path");
@@ -1329,21 +1329,21 @@ var require_sonic_boom = __commonJS({
       if (sonic.sync) {
         try {
           if (sonic.mkdir)
-            fs.mkdirSync(path.dirname(file), { recursive: true });
-          const fd = fs.openSync(file, flags, mode);
+            fs2.mkdirSync(path.dirname(file), { recursive: true });
+          const fd = fs2.openSync(file, flags, mode);
           fileOpened(null, fd);
         } catch (err) {
           fileOpened(err);
           throw err;
         }
       } else if (sonic.mkdir) {
-        fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
+        fs2.mkdir(path.dirname(file), { recursive: true }, (err) => {
           if (err)
             return fileOpened(err);
-          fs.open(file, flags, mode, fileOpened);
+          fs2.open(file, flags, mode, fileOpened);
         });
       } else {
-        fs.open(file, flags, mode, fileOpened);
+        fs2.open(file, flags, mode, fileOpened);
       }
     }
     function SonicBoom(opts) {
@@ -1394,7 +1394,7 @@ var require_sonic_boom = __commonJS({
               }
             } else {
               setTimeout(() => {
-                fs.write(this.fd, this._writingBuf, "utf8", this.release);
+                fs2.write(this.fd, this._writingBuf, "utf8", this.release);
               }, BUSY_WRITE_TIMEOUT);
             }
           } else {
@@ -1408,12 +1408,12 @@ var require_sonic_boom = __commonJS({
         this._writingBuf = this._writingBuf.slice(n);
         if (this._writingBuf.length) {
           if (!this.sync) {
-            fs.write(this.fd, this._writingBuf, "utf8", this.release);
+            fs2.write(this.fd, this._writingBuf, "utf8", this.release);
             return;
           }
           try {
             do {
-              const n2 = fs.writeSync(this.fd, this._writingBuf, "utf8");
+              const n2 = fs2.writeSync(this.fd, this._writingBuf, "utf8");
               this._len -= n2;
               this._writingBuf = this._writingBuf.slice(n2);
             } while (this._writingBuf);
@@ -1518,7 +1518,7 @@ var require_sonic_boom = __commonJS({
       const fd = this.fd;
       this.once("ready", () => {
         if (fd !== this.fd) {
-          fs.close(fd, (err) => {
+          fs2.close(fd, (err) => {
             if (err) {
               return this.emit("error", err);
             }
@@ -1564,7 +1564,7 @@ var require_sonic_boom = __commonJS({
       while (this._bufs.length) {
         const buf = this._bufs[0];
         try {
-          this._len -= fs.writeSync(this.fd, buf, "utf8");
+          this._len -= fs2.writeSync(this.fd, buf, "utf8");
           this._bufs.shift();
         } catch (err) {
           if (err.code !== "EAGAIN" || !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
@@ -1586,13 +1586,13 @@ var require_sonic_boom = __commonJS({
       sonic._writingBuf = sonic._writingBuf || sonic._bufs.shift() || "";
       if (sonic.sync) {
         try {
-          const written = fs.writeSync(sonic.fd, sonic._writingBuf, "utf8");
+          const written = fs2.writeSync(sonic.fd, sonic._writingBuf, "utf8");
           release(null, written);
         } catch (err) {
           release(err);
         }
       } else {
-        fs.write(sonic.fd, sonic._writingBuf, "utf8", release);
+        fs2.write(sonic.fd, sonic._writingBuf, "utf8", release);
       }
     }
     function actualClose(sonic) {
@@ -1603,7 +1603,7 @@ var require_sonic_boom = __commonJS({
       sonic.destroyed = true;
       sonic._bufs = [];
       if (sonic.fd !== 1 && sonic.fd !== 2) {
-        fs.close(sonic.fd, done);
+        fs2.close(sonic.fd, done);
       } else {
         setImmediate(done);
       }
@@ -2689,7 +2689,7 @@ var require_pump = __commonJS({
   "node_modules/pump/index.js"(exports, module2) {
     var once = require_once();
     var eos = require_end_of_stream();
-    var fs = require("fs");
+    var fs2 = require("fs");
     var noop = function() {
     };
     var ancient = /^v?\.0/.test(process.version);
@@ -2699,9 +2699,9 @@ var require_pump = __commonJS({
     var isFS = function(stream) {
       if (!ancient)
         return false;
-      if (!fs)
+      if (!fs2)
         return false;
-      return (stream instanceof (fs.ReadStream || noop) || stream instanceof (fs.WriteStream || noop)) && isFn(stream.close);
+      return (stream instanceof (fs2.ReadStream || noop) || stream instanceof (fs2.WriteStream || noop)) && isFn(stream.close);
     };
     var isRequest = function(stream) {
       return stream.setHeader && isFn(stream.abort);
@@ -14566,7 +14566,7 @@ var require_dateformat = __commonJS({
 var require_sonic_boom2 = __commonJS({
   "node_modules/sonic-boom/index.js"(exports, module2) {
     "use strict";
-    var fs = require("fs");
+    var fs2 = require("fs");
     var EventEmitter = require("events");
     var inherits = require("util").inherits;
     var path = require("path");
@@ -14615,21 +14615,21 @@ var require_sonic_boom2 = __commonJS({
       if (sonic.sync) {
         try {
           if (sonic.mkdir)
-            fs.mkdirSync(path.dirname(file), { recursive: true });
-          const fd = fs.openSync(file, flags, mode);
+            fs2.mkdirSync(path.dirname(file), { recursive: true });
+          const fd = fs2.openSync(file, flags, mode);
           fileOpened(null, fd);
         } catch (err) {
           fileOpened(err);
           throw err;
         }
       } else if (sonic.mkdir) {
-        fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
+        fs2.mkdir(path.dirname(file), { recursive: true }, (err) => {
           if (err)
             return fileOpened(err);
-          fs.open(file, flags, mode, fileOpened);
+          fs2.open(file, flags, mode, fileOpened);
         });
       } else {
-        fs.open(file, flags, mode, fileOpened);
+        fs2.open(file, flags, mode, fileOpened);
       }
     }
     function SonicBoom(opts) {
@@ -14681,7 +14681,7 @@ var require_sonic_boom2 = __commonJS({
               }
             } else {
               setTimeout(() => {
-                fs.write(this.fd, this._writingBuf, "utf8", this.release);
+                fs2.write(this.fd, this._writingBuf, "utf8", this.release);
               }, BUSY_WRITE_TIMEOUT);
             }
           } else {
@@ -14698,12 +14698,12 @@ var require_sonic_boom2 = __commonJS({
         this._writingBuf = this._writingBuf.slice(n);
         if (this._writingBuf.length) {
           if (!this.sync) {
-            fs.write(this.fd, this._writingBuf, "utf8", this.release);
+            fs2.write(this.fd, this._writingBuf, "utf8", this.release);
             return;
           }
           try {
             do {
-              const n2 = fs.writeSync(this.fd, this._writingBuf, "utf8");
+              const n2 = fs2.writeSync(this.fd, this._writingBuf, "utf8");
               this._len -= n2;
               this._writingBuf = this._writingBuf.slice(n2);
             } while (this._writingBuf);
@@ -14713,7 +14713,7 @@ var require_sonic_boom2 = __commonJS({
           }
         }
         if (this._fsync) {
-          fs.fsyncSync(this.fd);
+          fs2.fsyncSync(this.fd);
         }
         const len = this._len;
         if (this._reopening) {
@@ -14811,7 +14811,7 @@ var require_sonic_boom2 = __commonJS({
       const fd = this.fd;
       this.once("ready", () => {
         if (fd !== this.fd) {
-          fs.close(fd, (err) => {
+          fs2.close(fd, (err) => {
             if (err) {
               return this.emit("error", err);
             }
@@ -14860,7 +14860,7 @@ var require_sonic_boom2 = __commonJS({
           buf = this._bufs[0];
         }
         try {
-          const n = fs.writeSync(this.fd, buf, "utf8");
+          const n = fs2.writeSync(this.fd, buf, "utf8");
           buf = buf.slice(n);
           this._len = Math.max(this._len - n, 0);
           if (buf.length <= 0) {
@@ -14886,13 +14886,13 @@ var require_sonic_boom2 = __commonJS({
       sonic._writingBuf = sonic._writingBuf || sonic._bufs.shift() || "";
       if (sonic.sync) {
         try {
-          const written = fs.writeSync(sonic.fd, sonic._writingBuf, "utf8");
+          const written = fs2.writeSync(sonic.fd, sonic._writingBuf, "utf8");
           release(null, written);
         } catch (err) {
           release(err);
         }
       } else {
-        fs.write(sonic.fd, sonic._writingBuf, "utf8", release);
+        fs2.write(sonic.fd, sonic._writingBuf, "utf8", release);
       }
     }
     function actualClose(sonic) {
@@ -14903,7 +14903,7 @@ var require_sonic_boom2 = __commonJS({
       sonic.destroyed = true;
       sonic._bufs = [];
       if (sonic.fd !== 1 && sonic.fd !== 2) {
-        fs.close(sonic.fd, done);
+        fs2.close(sonic.fd, done);
       } else {
         setImmediate(done);
       }
@@ -18652,6 +18652,7 @@ __export(app_exports, {
 });
 module.exports = __toCommonJS(app_exports);
 var import_register = __toESM(require_register());
+var fs = __toESM(require("fs"));
 var import_querystring = __toESM(require("querystring"));
 
 // src/framework/logging.ts
@@ -18722,12 +18723,18 @@ var createHandler = (fn) => withDatadog(
 );
 
 // src/app.ts
+var words = fs.readFileSync("src/Assets/AcceptedWords.txt", "utf-8");
+var wordList = words.split("\r\n");
 var checkInput = (inputCommand) => {
   const splitInput = inputCommand.split(" ");
   if (splitInput[0] === "guess" && splitInput[1].length === 5 && splitInput.length === 2) {
     return {
       status: 200,
-      result: "`".concat(splitInput[1], ":`", wordleReturn(splitInput[1]))
+      result: "`".concat(
+        splitInput[1],
+        ":`",
+        wordleReturn(splitInput[1].toLowerCase())
+      )
     };
   }
   if (splitInput[0] === "create" && splitInput[1].length === 5 && splitInput.length === 2) {
@@ -18747,8 +18754,21 @@ var checkInput = (inputCommand) => {
     result: 'Not a valid command, use "help" for valid commands'
   };
 };
+var wordleValidGuess = (guess) => words.includes(guess);
+var countCharacterOccurrence = (target) => {
+  const characterOccurrences = {};
+  for (let x = 0, length = target.length; x < length; x++) {
+    const l = target.charAt(x);
+    characterOccurrences[l] = isNaN(characterOccurrences[l]) ? 1 : characterOccurrences[l] + 1;
+  }
+  return characterOccurrences;
+};
 var wordleReturn = (guess) => {
-  const sampleTarget = "sound";
+  if (!wordleValidGuess(guess)) {
+    return "Not a valid guess";
+  }
+  const sampleTarget = "sorry";
+  const targetCharacters = countCharacterOccurrence(sampleTarget);
   const incorrect = ":black_circle: ";
   const defaultResponse = [
     incorrect,
@@ -18770,9 +18790,16 @@ var wordleReturn = (guess) => {
       if (!correctLetter.includes(guess[i])) {
         defaultResponse[i] = ":large_yellow_circle: ";
         correctLetter += guess[i];
+      } else if (targetCharacters[guess[i]] > 1 && sampleTarget[i] !== guess[i]) {
+        defaultResponse[i] = ":large_yellow_circle: ";
+        correctLetter += guess[i];
+        targetCharacters[guess[i]] = targetCharacters[guess[i]] - 1;
       }
     }
     uiOutput += defaultResponse[i];
+  }
+  if (guess === sampleTarget) {
+    uiOutput += "\n :tada: Correct in {get number attempts} attempts :tada:";
   }
   return uiOutput;
 };

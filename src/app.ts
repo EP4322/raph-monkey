@@ -1,9 +1,11 @@
 import 'skuba-dive/register';
+import * as fs from 'fs';
 import querystring from 'querystring';
 
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
 import { createHandler } from 'src/framework/handler';
+
 // import { scoringService } from 'src/services/jobScorer';
 // import { sendPipelineEvent } from 'src/services/pipelineEventSender';
 
@@ -13,6 +15,9 @@ import { createHandler } from 'src/framework/handler';
 // const smokeTest = async () => {
 //   await Promise.all([scoringService.smokeTest(), sendPipelineEvent({}, true)]);
 // };
+
+const words = fs.readFileSync('src/Assets/AcceptedWords.txt', 'utf-8');
+const wordList = words.split('\r\n');
 
 interface SlashCommand {
   token: string;
@@ -39,7 +44,11 @@ const checkInput = (inputCommand: string) => {
   ) {
     return {
       status: 200,
-      result: '`'.concat(splitInput[1], ':`', wordleReturn(splitInput[1])),
+      result: '`'.concat(
+        splitInput[1],
+        ':`',
+        wordleReturn(splitInput[1].toLowerCase()),
+      ),
     };
   }
 
@@ -69,8 +78,27 @@ const checkInput = (inputCommand: string) => {
   };
 };
 
+const wordleValidGuess = (guess: string) => words.includes(guess);
+
+const countCharacterOccurrence = (target: string) => {
+  const characterOccurrences: { [key: string]: number } = {};
+  for (let x = 0, length = target.length; x < length; x++) {
+    const l = target.charAt(x);
+    characterOccurrences[l] = isNaN(characterOccurrences[l])
+      ? 1
+      : characterOccurrences[l] + 1;
+  }
+  return characterOccurrences;
+};
+
 const wordleReturn = (guess: string) => {
-  const sampleTarget = 'sound';
+  if (!wordleValidGuess(guess)) {
+    return 'Not a valid guess';
+  }
+
+  const sampleTarget = 'sorry';
+  const targetCharacters = countCharacterOccurrence(sampleTarget);
+
   const incorrect = ':black_circle: ';
   const defaultResponse = [
     incorrect,
@@ -82,6 +110,7 @@ const wordleReturn = (guess: string) => {
 
   let uiOutput = '';
   let correctLetter = '';
+
   for (let i = 0; i < 5; i++) {
     if (sampleTarget[i] === guess[i]) {
       defaultResponse[i] = ':large_green_circle: ';
@@ -94,9 +123,20 @@ const wordleReturn = (guess: string) => {
       if (!correctLetter.includes(guess[i])) {
         defaultResponse[i] = ':large_yellow_circle: ';
         correctLetter += guess[i];
+      } else if (
+        targetCharacters[guess[i]] > 1 &&
+        sampleTarget[i] !== guess[i]
+      ) {
+        defaultResponse[i] = ':large_yellow_circle: ';
+        correctLetter += guess[i];
+        targetCharacters[guess[i]] = targetCharacters[guess[i]] - 1;
       }
     }
     uiOutput += defaultResponse[i];
+  }
+
+  if (guess === sampleTarget) {
+    uiOutput += '\n :tada: Correct in {get number attempts} attempts :tada:';
   }
   return uiOutput;
 };
