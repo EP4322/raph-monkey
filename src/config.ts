@@ -7,6 +7,7 @@ interface Config {
   metrics: boolean;
   name: string;
   version: string;
+  raphGuessesTable: string;
 }
 
 type Environment = (typeof environments)[number];
@@ -22,6 +23,7 @@ const configs: Record<Environment, () => Omit<Config, 'environment'>> = {
     metrics: false,
     name: 'raph-monkey',
     version: 'local',
+    raphGuessesTable: 'raph-guesses',
   }),
 
   test: () => ({
@@ -42,6 +44,8 @@ const configs: Record<Environment, () => Omit<Config, 'environment'>> = {
     metrics: true,
     name: Env.string('SERVICE'),
     version: Env.string('VERSION'),
+    raphGuessesTable: 'raph-guesses',
+    // raphGuessesTable: Env.string('RAPH_GUESSES_TABLE'),
   }),
 };
 

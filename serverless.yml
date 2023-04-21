@@ -42,6 +42,13 @@ provider:
         - Action: lambda:InvokeFunction
           Effect: Allow
           Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:functions.Worker.name}
+        - Effect: Allow
+          Action: # Gives permission to DynamoDB tables in a specific region
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+          Resource: !Sub ${guesses.Arn}
   stackTags:
     # TODO: add data classification tags
     # https://rfc.skinfra.xyz/RFC019-AWS-Tagging-Standard.html#seekdataconsumers
@@ -70,6 +77,7 @@ functions:
       ENVIRONMENT: ${env:ENVIRONMENT}
       SERVICE: ${self:service}
       VERSION: ${env:VERSION, 'local'}
+      RAPH_GUESSES_TABLE: !Ref guesses
 
     events:
       - httpApi: 'POST /invoke'
@@ -85,3 +93,23 @@ functions:
 resources:
   # This becomes the Lambda application's description
   Description: ${param:description}
+
+  Resources:
+    guesses:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: raph-guesses
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: user
+            AttributeType: S
+          - AttributeName: timeStamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user
+            KeyType: HASH
+          - AttributeName: timeStamp
+            KeyType: RANGE
+
+package:
+  individually: true

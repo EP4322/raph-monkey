@@ -2,9 +2,13 @@ import 'skuba-dive/register';
 import * as fs from 'fs';
 import querystring from 'querystring';
 
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
 import { createHandler } from 'src/framework/handler';
+
+import { config } from './config';
 
 // import { scoringService } from 'src/services/jobScorer';
 // import { sendPipelineEvent } from 'src/services/pipelineEventSender';
@@ -17,7 +21,38 @@ import { createHandler } from 'src/framework/handler';
 // };
 
 const words = fs.readFileSync('src/Assets/AcceptedWords.txt', 'utf-8');
-const wordList = words.split('\r\n');
+const ddbClient = DynamoDBDocument.from(new DynamoDBClient({}));
+
+export const storeGuess = async (guess: Guess): Promise<void> => {
+  console.log(JSON.stringify(config.raphGuessesTable));
+  await ddbClient.put({
+    Item: guess,
+    TableName: config.raphGuessesTable,
+  });
+};
+
+export const getGuesses = async (): Promise<Guess[]> => {
+  const output = await ddbClient.query({
+    TableName: config.raphGuessesTable,
+    KeyConditionExpression:
+      '#user = :user AND begins_with(#timeStamp, :timeStamp)',
+    ExpressionAttributeNames: { '#user': 'user', '#timeStamp': 'timeStamp' },
+    ExpressionAttributeValues: {
+      ':user': 'Emma',
+      ':timeStamp': '2023-04-21',
+    },
+    // Key: { user: 'Emma', timeStamp: '2023-04-21T00:57:27.600Z' },
+  });
+
+  return (output.Items ?? []) as Guess[];
+};
+
+interface Guess {
+  user: string;
+  timeStamp: string;
+  guessNumber: number;
+  guess: string;
+}
 
 interface SlashCommand {
   token: string;
@@ -35,7 +70,7 @@ interface SlashCommand {
   trigger_id: string;
 }
 
-const checkInput = (inputCommand: string) => {
+const checkInput = async (inputCommand: string) => {
   const splitInput = inputCommand.split(' ');
   if (
     splitInput[0] === 'guess' &&
@@ -47,7 +82,7 @@ const checkInput = (inputCommand: string) => {
       result: '`'.concat(
         splitInput[1],
         ':`',
-        wordleReturn(splitInput[1].toLowerCase()),
+        await wordleReturn(splitInput[1].toLowerCase()),
       ),
     };
   }
@@ -91,10 +126,23 @@ const countCharacterOccurrence = (target: string) => {
   return characterOccurrences;
 };
 
-const wordleReturn = (guess: string) => {
+const wordleReturn = async (guess: string) => {
   if (!wordleValidGuess(guess)) {
     return 'Not a valid guess';
   }
+
+  const pastGuesses = await getGuesses();
+  console.log(pastGuesses);
+
+  const guessStoring: Guess = {
+    user: 'Emma',
+    timeStamp: new Date().toISOString(),
+    guessNumber: 0,
+    guess,
+  };
+
+  console.log(guessStoring);
+  await storeGuess(guessStoring);
 
   const sampleTarget = 'sorry';
   const targetCharacters = countCharacterOccurrence(sampleTarget);
@@ -144,7 +192,6 @@ const wordleReturn = (guess: string) => {
 export const handler = createHandler<APIGatewayProxyEventV2>(
   // eslint-disable-next-line @typescript-eslint/require-await
   async (event) => {
-    console.log(event.body);
     if (event.body === undefined) {
       return {
         statusCode: 400,
@@ -155,8 +202,7 @@ export const handler = createHandler<APIGatewayProxyEventV2>(
     const slackObject = querystring.parse(
       event.body,
     ) as unknown as SlashCommand;
-    console.log(slackObject.text);
-    const { status, result } = checkInput(slackObject.text);
+    const { status, result } = await checkInput(slackObject.text);
 
     return {
       statusCode: status,
