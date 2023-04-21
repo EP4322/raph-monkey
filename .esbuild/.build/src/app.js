@@ -46270,11 +46270,12 @@ var wordleReturn = async (guess) => {
     return "Not a valid guess";
   }
   const pastGuesses = await getGuesses();
-  console.log(pastGuesses);
+  console.log(pastGuesses.length);
+  const currentGuessNumber = pastGuesses.length + 1;
   const guessStoring = {
     user: "Emma",
     timeStamp: new Date().toISOString(),
-    guessNumber: 0,
+    guessNumber: currentGuessNumber,
     guess
   };
   console.log(guessStoring);
@@ -46311,7 +46312,8 @@ var wordleReturn = async (guess) => {
     uiOutput += defaultResponse[i];
   }
   if (guess === sampleTarget) {
-    uiOutput += "\n :tada: Correct in {get number attempts} attempts :tada:";
+    uiOutput += `
+ :tada: Correct in ${currentGuessNumber} attempts :tada:`;
   }
   return uiOutput;
 };

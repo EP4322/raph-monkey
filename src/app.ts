@@ -132,12 +132,13 @@ const wordleReturn = async (guess: string) => {
   }
 
   const pastGuesses = await getGuesses();
-  console.log(pastGuesses);
+  console.log(pastGuesses.length);
 
+  const currentGuessNumber = pastGuesses.length + 1;
   const guessStoring: Guess = {
     user: 'Emma',
     timeStamp: new Date().toISOString(),
-    guessNumber: 0,
+    guessNumber: currentGuessNumber,
     guess,
   };
 
@@ -184,7 +185,7 @@ const wordleReturn = async (guess: string) => {
   }
 
   if (guess === sampleTarget) {
-    uiOutput += '\n :tada: Correct in {get number attempts} attempts :tada:';
+    uiOutput += `\n :tada: Correct in ${currentGuessNumber} attempts :tada:`;
   }
   return uiOutput;
 };
