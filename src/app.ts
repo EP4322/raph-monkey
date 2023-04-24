@@ -9,6 +9,7 @@ import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { createHandler } from 'src/framework/handler';
 
 import { config } from './config';
+import { findWordOfTheDay } from './getDailyWord';
 
 // import { scoringService } from 'src/services/jobScorer';
 // import { sendPipelineEvent } from 'src/services/pipelineEventSender';
@@ -106,23 +107,11 @@ const checkInput = async (inputCommand: string, user: string) => {
     };
   }
 
-  if (
-    splitInput[0] === 'create' &&
-    splitInput[1].length === 5 &&
-    splitInput.length === 2
-  ) {
-    return { status: 200, result: 'Wordle Created Successfully' };
-  }
-
-  if (splitInput[0] === 'start' && splitInput.length === 1) {
-    return { status: 200, result: 'Wordle Started Successfully' };
-  }
-
   if (splitInput[0] === 'help' && splitInput.length === 1) {
     return {
       status: 200,
       result:
-        'Use command "start" to begin todays wordle or "guess <word>" to make a wordle guess',
+        'Use command "guess <word>" to make a wordle guess! Normal wordle rules apply :monkey: \n \n (But beware of the twist...:clock1: )',
     };
   }
 
@@ -168,7 +157,9 @@ const wordleReturn = async (guess: string, user: string) => {
     );
   }
 
-  const sampleTarget = 'sorry';
+  const sampleTarget = await findWordOfTheDay();
+  console.log('Word of the day is: ');
+  console.log(sampleTarget);
   const targetCharacters = countCharacterOccurrence(sampleTarget);
 
   const incorrect = ':black_circle: ';
@@ -220,7 +211,14 @@ const wordleReturn = async (guess: string, user: string) => {
   await storeGuess(guessStoring);
 
   if (guess === sampleTarget) {
-    uiOutput += `\n :tada: Correct in ${currentGuessNumber} attempts :tada:`;
+    const start = new Date(pastGuesses[0].timeStamp).getTime();
+    const end = new Date(guessStoring.timeStamp).getTime();
+    const timeDifference = Math.round((end - start) / 1000);
+    const score = Math.round(
+      guessStoring.guessNumber * 100 - 100 + timeDifference,
+    );
+
+    uiOutput += `\n \n :tada: Correct in ${currentGuessNumber} attempts \n \n :clock1: of ${timeDifference} s \n \n Your score is: ${score}`;
   }
   return { uiOutput, previousGuessesUi };
 };

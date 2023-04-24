@@ -24581,7 +24581,7 @@ var require_DynamoDBClient = __commonJS({
     var DescribeEndpointsCommand_1 = require_DescribeEndpointsCommand();
     var EndpointParameters_1 = require_EndpointParameters();
     var runtimeConfig_1 = require_runtimeConfig4();
-    var DynamoDBClient2 = class extends smithy_client_1.Client {
+    var DynamoDBClient3 = class extends smithy_client_1.Client {
       constructor(configuration) {
         const _config_0 = (0, runtimeConfig_1.getRuntimeConfig)(configuration);
         const _config_1 = (0, EndpointParameters_1.resolveClientEndpointParameters)(_config_0);
@@ -24608,7 +24608,7 @@ var require_DynamoDBClient = __commonJS({
         super.destroy();
       }
     };
-    exports.DynamoDBClient = DynamoDBClient2;
+    exports.DynamoDBClient = DynamoDBClient3;
   }
 });
 
@@ -27380,9 +27380,9 @@ var require_DynamoDBDocument = __commonJS({
     var TransactWriteCommand_1 = require_TransactWriteCommand();
     var UpdateCommand_1 = require_UpdateCommand();
     var DynamoDBDocumentClient_1 = require_DynamoDBDocumentClient();
-    var DynamoDBDocument2 = class extends DynamoDBDocumentClient_1.DynamoDBDocumentClient {
+    var DynamoDBDocument3 = class extends DynamoDBDocumentClient_1.DynamoDBDocumentClient {
       static from(client, translateConfig) {
-        return new DynamoDBDocument2(client, translateConfig);
+        return new DynamoDBDocument3(client, translateConfig);
       }
       batchExecuteStatement(args, optionsOrCb, cb) {
         const command = new BatchExecuteStatementCommand_1.BatchExecuteStatementCommand(args);
@@ -27541,7 +27541,7 @@ var require_DynamoDBDocument = __commonJS({
         }
       }
     };
-    exports.DynamoDBDocument = DynamoDBDocument2;
+    exports.DynamoDBDocument = DynamoDBDocument3;
   }
 });
 
@@ -28755,7 +28755,7 @@ var require_atomic_sleep = __commonJS({
 var require_sonic_boom = __commonJS({
   "node_modules/pino/node_modules/sonic-boom/index.js"(exports, module2) {
     "use strict";
-    var fs2 = require("fs");
+    var fs3 = require("fs");
     var EventEmitter = require("events");
     var inherits = require("util").inherits;
     var path = require("path");
@@ -28804,21 +28804,21 @@ var require_sonic_boom = __commonJS({
       if (sonic.sync) {
         try {
           if (sonic.mkdir)
-            fs2.mkdirSync(path.dirname(file), { recursive: true });
-          const fd = fs2.openSync(file, flags, mode);
+            fs3.mkdirSync(path.dirname(file), { recursive: true });
+          const fd = fs3.openSync(file, flags, mode);
           fileOpened(null, fd);
         } catch (err) {
           fileOpened(err);
           throw err;
         }
       } else if (sonic.mkdir) {
-        fs2.mkdir(path.dirname(file), { recursive: true }, (err) => {
+        fs3.mkdir(path.dirname(file), { recursive: true }, (err) => {
           if (err)
             return fileOpened(err);
-          fs2.open(file, flags, mode, fileOpened);
+          fs3.open(file, flags, mode, fileOpened);
         });
       } else {
-        fs2.open(file, flags, mode, fileOpened);
+        fs3.open(file, flags, mode, fileOpened);
       }
     }
     function SonicBoom(opts) {
@@ -28869,7 +28869,7 @@ var require_sonic_boom = __commonJS({
               }
             } else {
               setTimeout(() => {
-                fs2.write(this.fd, this._writingBuf, "utf8", this.release);
+                fs3.write(this.fd, this._writingBuf, "utf8", this.release);
               }, BUSY_WRITE_TIMEOUT);
             }
           } else {
@@ -28883,12 +28883,12 @@ var require_sonic_boom = __commonJS({
         this._writingBuf = this._writingBuf.slice(n);
         if (this._writingBuf.length) {
           if (!this.sync) {
-            fs2.write(this.fd, this._writingBuf, "utf8", this.release);
+            fs3.write(this.fd, this._writingBuf, "utf8", this.release);
             return;
           }
           try {
             do {
-              const n2 = fs2.writeSync(this.fd, this._writingBuf, "utf8");
+              const n2 = fs3.writeSync(this.fd, this._writingBuf, "utf8");
               this._len -= n2;
               this._writingBuf = this._writingBuf.slice(n2);
             } while (this._writingBuf);
@@ -28993,7 +28993,7 @@ var require_sonic_boom = __commonJS({
       const fd = this.fd;
       this.once("ready", () => {
         if (fd !== this.fd) {
-          fs2.close(fd, (err) => {
+          fs3.close(fd, (err) => {
             if (err) {
               return this.emit("error", err);
             }
@@ -29039,7 +29039,7 @@ var require_sonic_boom = __commonJS({
       while (this._bufs.length) {
         const buf = this._bufs[0];
         try {
-          this._len -= fs2.writeSync(this.fd, buf, "utf8");
+          this._len -= fs3.writeSync(this.fd, buf, "utf8");
           this._bufs.shift();
         } catch (err) {
           if (err.code !== "EAGAIN" || !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
@@ -29061,13 +29061,13 @@ var require_sonic_boom = __commonJS({
       sonic._writingBuf = sonic._writingBuf || sonic._bufs.shift() || "";
       if (sonic.sync) {
         try {
-          const written = fs2.writeSync(sonic.fd, sonic._writingBuf, "utf8");
+          const written = fs3.writeSync(sonic.fd, sonic._writingBuf, "utf8");
           release(null, written);
         } catch (err) {
           release(err);
         }
       } else {
-        fs2.write(sonic.fd, sonic._writingBuf, "utf8", release);
+        fs3.write(sonic.fd, sonic._writingBuf, "utf8", release);
       }
     }
     function actualClose(sonic) {
@@ -29078,7 +29078,7 @@ var require_sonic_boom = __commonJS({
       sonic.destroyed = true;
       sonic._bufs = [];
       if (sonic.fd !== 1 && sonic.fd !== 2) {
-        fs2.close(sonic.fd, done);
+        fs3.close(sonic.fd, done);
       } else {
         setImmediate(done);
       }
@@ -30164,7 +30164,7 @@ var require_pump = __commonJS({
   "node_modules/pump/index.js"(exports, module2) {
     var once = require_once();
     var eos = require_end_of_stream();
-    var fs2 = require("fs");
+    var fs3 = require("fs");
     var noop = function() {
     };
     var ancient = /^v?\.0/.test(process.version);
@@ -30174,9 +30174,9 @@ var require_pump = __commonJS({
     var isFS = function(stream) {
       if (!ancient)
         return false;
-      if (!fs2)
+      if (!fs3)
         return false;
-      return (stream instanceof (fs2.ReadStream || noop) || stream instanceof (fs2.WriteStream || noop)) && isFn(stream.close);
+      return (stream instanceof (fs3.ReadStream || noop) || stream instanceof (fs3.WriteStream || noop)) && isFn(stream.close);
     };
     var isRequest = function(stream) {
       return stream.setHeader && isFn(stream.abort);
@@ -42041,7 +42041,7 @@ var require_dateformat = __commonJS({
 var require_sonic_boom2 = __commonJS({
   "node_modules/sonic-boom/index.js"(exports, module2) {
     "use strict";
-    var fs2 = require("fs");
+    var fs3 = require("fs");
     var EventEmitter = require("events");
     var inherits = require("util").inherits;
     var path = require("path");
@@ -42090,21 +42090,21 @@ var require_sonic_boom2 = __commonJS({
       if (sonic.sync) {
         try {
           if (sonic.mkdir)
-            fs2.mkdirSync(path.dirname(file), { recursive: true });
-          const fd = fs2.openSync(file, flags, mode);
+            fs3.mkdirSync(path.dirname(file), { recursive: true });
+          const fd = fs3.openSync(file, flags, mode);
           fileOpened(null, fd);
         } catch (err) {
           fileOpened(err);
           throw err;
         }
       } else if (sonic.mkdir) {
-        fs2.mkdir(path.dirname(file), { recursive: true }, (err) => {
+        fs3.mkdir(path.dirname(file), { recursive: true }, (err) => {
           if (err)
             return fileOpened(err);
-          fs2.open(file, flags, mode, fileOpened);
+          fs3.open(file, flags, mode, fileOpened);
         });
       } else {
-        fs2.open(file, flags, mode, fileOpened);
+        fs3.open(file, flags, mode, fileOpened);
       }
     }
     function SonicBoom(opts) {
@@ -42156,7 +42156,7 @@ var require_sonic_boom2 = __commonJS({
               }
             } else {
               setTimeout(() => {
-                fs2.write(this.fd, this._writingBuf, "utf8", this.release);
+                fs3.write(this.fd, this._writingBuf, "utf8", this.release);
               }, BUSY_WRITE_TIMEOUT);
             }
           } else {
@@ -42173,12 +42173,12 @@ var require_sonic_boom2 = __commonJS({
         this._writingBuf = this._writingBuf.slice(n);
         if (this._writingBuf.length) {
           if (!this.sync) {
-            fs2.write(this.fd, this._writingBuf, "utf8", this.release);
+            fs3.write(this.fd, this._writingBuf, "utf8", this.release);
             return;
           }
           try {
             do {
-              const n2 = fs2.writeSync(this.fd, this._writingBuf, "utf8");
+              const n2 = fs3.writeSync(this.fd, this._writingBuf, "utf8");
               this._len -= n2;
               this._writingBuf = this._writingBuf.slice(n2);
             } while (this._writingBuf);
@@ -42188,7 +42188,7 @@ var require_sonic_boom2 = __commonJS({
           }
         }
         if (this._fsync) {
-          fs2.fsyncSync(this.fd);
+          fs3.fsyncSync(this.fd);
         }
         const len = this._len;
         if (this._reopening) {
@@ -42286,7 +42286,7 @@ var require_sonic_boom2 = __commonJS({
       const fd = this.fd;
       this.once("ready", () => {
         if (fd !== this.fd) {
-          fs2.close(fd, (err) => {
+          fs3.close(fd, (err) => {
             if (err) {
               return this.emit("error", err);
             }
@@ -42335,7 +42335,7 @@ var require_sonic_boom2 = __commonJS({
           buf = this._bufs[0];
         }
         try {
-          const n = fs2.writeSync(this.fd, buf, "utf8");
+          const n = fs3.writeSync(this.fd, buf, "utf8");
           buf = buf.slice(n);
           this._len = Math.max(this._len - n, 0);
           if (buf.length <= 0) {
@@ -42361,13 +42361,13 @@ var require_sonic_boom2 = __commonJS({
       sonic._writingBuf = sonic._writingBuf || sonic._bufs.shift() || "";
       if (sonic.sync) {
         try {
-          const written = fs2.writeSync(sonic.fd, sonic._writingBuf, "utf8");
+          const written = fs3.writeSync(sonic.fd, sonic._writingBuf, "utf8");
           release(null, written);
         } catch (err) {
           release(err);
         }
       } else {
-        fs2.write(sonic.fd, sonic._writingBuf, "utf8", release);
+        fs3.write(sonic.fd, sonic._writingBuf, "utf8", release);
       }
     }
     function actualClose(sonic) {
@@ -42378,7 +42378,7 @@ var require_sonic_boom2 = __commonJS({
       sonic.destroyed = true;
       sonic._bufs = [];
       if (sonic.fd !== 1 && sonic.fd !== 2) {
-        fs2.close(sonic.fd, done);
+        fs3.close(sonic.fd, done);
       } else {
         setImmediate(done);
       }
@@ -46129,10 +46129,10 @@ __export(app_exports, {
 });
 module.exports = __toCommonJS(app_exports);
 var import_register = __toESM(require_register());
-var fs = __toESM(require("fs"));
+var fs2 = __toESM(require("fs"));
 var import_querystring = __toESM(require("querystring"));
-var import_client_dynamodb = __toESM(require_dist_cjs54());
-var import_lib_dynamodb = __toESM(require_dist_cjs58());
+var import_client_dynamodb2 = __toESM(require_dist_cjs54());
+var import_lib_dynamodb2 = __toESM(require_dist_cjs58());
 
 // src/framework/logging.ts
 var import_async_hooks = require("async_hooks");
@@ -46204,18 +46204,67 @@ var createHandler = (fn) => withDatadog(
   })
 );
 
-// src/app.ts
-var words = fs.readFileSync("src/Assets/AcceptedWords.txt", "utf-8");
+// src/getDailyWord.ts
+var fs = __toESM(require("fs"));
+var import_client_dynamodb = __toESM(require_dist_cjs54());
+var import_lib_dynamodb = __toESM(require_dist_cjs58());
+var todaysDateAll = new Date();
+var todaysDate = todaysDateAll.toISOString().split("T")[0];
 var ddbClient = import_lib_dynamodb.DynamoDBDocument.from(new import_client_dynamodb.DynamoDBClient({}));
+var createDailyWord = async () => {
+  const dailyWordStore = {
+    word: daily(),
+    user: "Master",
+    timeStamp: todaysDateAll.toISOString()
+  };
+  await ddbClient.put({
+    Item: dailyWordStore,
+    TableName: config.raphGuessesTable
+  });
+};
+var getDailyWord = async () => {
+  const output = await ddbClient.query({
+    TableName: config.raphGuessesTable,
+    KeyConditionExpression: "#user = :user AND begins_with(#timeStamp, :timeStamp)",
+    ExpressionAttributeNames: { "#user": "user", "#timeStamp": "timeStamp" },
+    ExpressionAttributeValues: {
+      ":user": "Master",
+      ":timeStamp": todaysDate
+      // '2023-04-24',
+    }
+    // Key: { user: 'Emma', timeStamp: '2023-04-21T00:57:27.600Z' },
+  });
+  return output.Items ?? [];
+};
+var daily = () => {
+  const raphBotWords = fs.readFileSync("src/Assets/PossibleWords.txt", "utf-8");
+  const lineByLine = raphBotWords.split("\n");
+  const wordOfTheDay = lineByLine[Math.floor(Math.random() * lineByLine.length)];
+  return wordOfTheDay;
+};
+var findWordOfTheDay = async () => {
+  const collectedWord = await getDailyWord();
+  if (collectedWord.length === 0) {
+    await createDailyWord();
+  }
+  if (collectedWord.length > 1) {
+    console.log("ERROR");
+  }
+  return collectedWord[0].word;
+};
+
+// src/app.ts
+var words = fs2.readFileSync("src/Assets/AcceptedWords.txt", "utf-8");
+var ddbClient2 = import_lib_dynamodb2.DynamoDBDocument.from(new import_client_dynamodb2.DynamoDBClient({}));
 var storeGuess = async (guess) => {
   console.log(JSON.stringify(config.raphGuessesTable));
-  await ddbClient.put({
+  await ddbClient2.put({
     Item: guess,
     TableName: config.raphGuessesTable
   });
 };
 var getGuesses = async (user, timeStamp) => {
-  const output = await ddbClient.query({
+  const output = await ddbClient2.query({
     TableName: config.raphGuessesTable,
     KeyConditionExpression: "#user = :user AND begins_with(#timeStamp, :timeStamp)",
     ExpressionAttributeNames: { "#user": "user", "#timeStamp": "timeStamp" },
@@ -46250,16 +46299,10 @@ var checkInput = async (inputCommand, user) => {
       )
     };
   }
-  if (splitInput[0] === "create" && splitInput[1].length === 5 && splitInput.length === 2) {
-    return { status: 200, result: "Wordle Created Successfully" };
-  }
-  if (splitInput[0] === "start" && splitInput.length === 1) {
-    return { status: 200, result: "Wordle Started Successfully" };
-  }
   if (splitInput[0] === "help" && splitInput.length === 1) {
     return {
       status: 200,
-      result: 'Use command "start" to begin todays wordle or "guess <word>" to make a wordle guess'
+      result: 'Use command "guess <word>" to make a wordle guess! Normal wordle rules apply :monkey: \n \n (But beware of the twist...:clock1: )'
     };
   }
   return {
@@ -46282,9 +46325,9 @@ var wordleReturn = async (guess, user) => {
     const previousGuessesUi2 = "";
     return { uiOutput: uiOutput2, previousGuessesUi: previousGuessesUi2 };
   }
-  const todaysDateAll = new Date();
-  const todaysDate = todaysDateAll.toISOString().split("T")[0];
-  const pastGuesses = await getGuesses(user, todaysDate);
+  const todaysDateAll2 = new Date();
+  const todaysDate2 = todaysDateAll2.toISOString().split("T")[0];
+  const pastGuesses = await getGuesses(user, todaysDate2);
   console.log(pastGuesses.length);
   let previousGuessesUi = "";
   for (let i = 0; i < pastGuesses.length; i++) {
@@ -46295,7 +46338,9 @@ var wordleReturn = async (guess, user) => {
       "\n \n"
     );
   }
-  const sampleTarget = "sorry";
+  const sampleTarget = await findWordOfTheDay();
+  console.log("Word of the day is: ");
+  console.log(sampleTarget);
   const targetCharacters = countCharacterOccurrence(sampleTarget);
   const incorrect = ":black_circle: ";
   const defaultResponse = [
@@ -46329,7 +46374,7 @@ var wordleReturn = async (guess, user) => {
   const currentGuessNumber = pastGuesses.length + 1;
   const guessStoring = {
     user,
-    timeStamp: todaysDateAll.toISOString(),
+    timeStamp: todaysDateAll2.toISOString(),
     guessNumber: currentGuessNumber,
     guess,
     uiOutput
@@ -46337,8 +46382,19 @@ var wordleReturn = async (guess, user) => {
   console.log(guessStoring);
   await storeGuess(guessStoring);
   if (guess === sampleTarget) {
+    const start = new Date(pastGuesses[0].timeStamp).getTime();
+    const end = new Date(guessStoring.timeStamp).getTime();
+    const timeDifference = Math.round((end - start) / 1e3);
+    const score = Math.round(
+      guessStoring.guessNumber * 100 - 100 + timeDifference
+    );
     uiOutput += `
- :tada: Correct in ${currentGuessNumber} attempts :tada:`;
+ 
+ :tada: Correct in ${currentGuessNumber} attempts 
+ 
+ :clock1: of ${timeDifference} s 
+ 
+ Your score is: ${score}`;
   }
   return { uiOutput, previousGuessesUi };
 };

@@ -89,6 +89,11 @@ functions:
     timeout: 300
     environment:
       FUNCTION_NAME_TO_INVOKE: ${self:functions.Worker.name}
+  # WordGenerator:
+  #   handler: src/getDailyWord.daily
+  #   events:
+  #     # 7pm every sunday-thursday UTC (5am every weekday AEST)
+  #     - schedule: cron(0 18 ? * SUN-SAT *)
 
 resources:
   # This becomes the Lambda application's description
