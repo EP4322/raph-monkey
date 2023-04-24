@@ -46231,13 +46231,13 @@ var getGuesses = async (user, timeStamp) => {
 var checkInput = async (inputCommand, user) => {
   const splitInput = inputCommand.split(" ");
   if (splitInput[0] === "guess" && splitInput[1].length === 5 && splitInput.length === 2) {
+    const { uiOutput, previousGuessesUi } = await wordleReturn(
+      splitInput[1].toLowerCase(),
+      user
+    );
     return {
       status: 200,
-      result: "`".concat(
-        splitInput[1],
-        ":`",
-        await wordleReturn(splitInput[1].toLowerCase(), user)
-      )
+      result: previousGuessesUi.concat("`", splitInput[1], ":`", uiOutput)
     };
   }
   if (splitInput[0] === "create" && splitInput[1].length === 5 && splitInput.length === 2) {
@@ -46268,21 +46268,23 @@ var countCharacterOccurrence = (target) => {
 };
 var wordleReturn = async (guess, user) => {
   if (!wordleValidGuess(guess)) {
-    return "Not a valid guess";
+    const uiOutput2 = "Not a valid guess";
+    const previousGuessesUi2 = "";
+    return { uiOutput: uiOutput2, previousGuessesUi: previousGuessesUi2 };
   }
   const todaysDateAll = new Date();
   const todaysDate = todaysDateAll.toISOString().split("T")[0];
   const pastGuesses = await getGuesses(user, todaysDate);
   console.log(pastGuesses.length);
-  const currentGuessNumber = pastGuesses.length + 1;
-  const guessStoring = {
-    user,
-    timeStamp: todaysDateAll.toISOString(),
-    guessNumber: currentGuessNumber,
-    guess
-  };
-  console.log(guessStoring);
-  await storeGuess(guessStoring);
+  let previousGuessesUi = "";
+  for (let i = 0; i < pastGuesses.length; i++) {
+    previousGuessesUi += "`".concat(
+      pastGuesses[i].guess,
+      ":`",
+      pastGuesses[i].uiOutput,
+      "\n \n"
+    );
+  }
   const sampleTarget = "sorry";
   const targetCharacters = countCharacterOccurrence(sampleTarget);
   const incorrect = ":black_circle: ";
@@ -46314,11 +46316,21 @@ var wordleReturn = async (guess, user) => {
     }
     uiOutput += defaultResponse[i];
   }
+  const currentGuessNumber = pastGuesses.length + 1;
+  const guessStoring = {
+    user,
+    timeStamp: todaysDateAll.toISOString(),
+    guessNumber: currentGuessNumber,
+    guess,
+    uiOutput
+  };
+  console.log(guessStoring);
+  await storeGuess(guessStoring);
   if (guess === sampleTarget) {
     uiOutput += `
  :tada: Correct in ${currentGuessNumber} attempts :tada:`;
   }
-  return uiOutput;
+  return { uiOutput, previousGuessesUi };
 };
 var handler = createHandler(
   // eslint-disable-next-line @typescript-eslint/require-await
