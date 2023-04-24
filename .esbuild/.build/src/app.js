@@ -46124,8 +46124,10 @@ var require_lib3 = __commonJS({
 var app_exports = {};
 __export(app_exports, {
   getGuesses: () => getGuesses,
+  getScores: () => getScores,
   handler: () => handler,
-  storeGuess: () => storeGuess
+  storeGuess: () => storeGuess,
+  storeScore: () => storeScore
 });
 module.exports = __toCommonJS(app_exports);
 var import_register = __toESM(require_register());
@@ -46263,6 +46265,13 @@ var storeGuess = async (guess) => {
     TableName: config.raphGuessesTable
   });
 };
+var storeScore = async (score) => {
+  console.log(JSON.stringify(config.raphGuessesTable));
+  await ddbClient2.put({
+    Item: score,
+    TableName: config.raphGuessesTable
+  });
+};
 var getGuesses = async (user, timeStamp) => {
   const output = await ddbClient2.query({
     TableName: config.raphGuessesTable,
@@ -46271,9 +46280,19 @@ var getGuesses = async (user, timeStamp) => {
     ExpressionAttributeValues: {
       ":user": user,
       ":timeStamp": timeStamp
-      // '2023-04-24',
     }
-    // Key: { user: 'Emma', timeStamp: '2023-04-21T00:57:27.600Z' },
+  });
+  return output.Items ?? [];
+};
+var getScores = async (user, timeStamp) => {
+  const output = await ddbClient2.query({
+    TableName: config.raphGuessesTable,
+    KeyConditionExpression: "#user = :user AND begins_with(#timeStamp, :timeStamp)",
+    ExpressionAttributeNames: { "#user": "user", "#timeStamp": "timeStamp" },
+    ExpressionAttributeValues: {
+      ":user": user,
+      ":timeStamp": timeStamp
+    }
   });
   return output.Items ?? [];
 };
@@ -46302,7 +46321,13 @@ var checkInput = async (inputCommand, user) => {
   if (splitInput[0] === "help" && splitInput.length === 1) {
     return {
       status: 200,
-      result: 'Use command "guess <word>" to make a wordle guess! Normal wordle rules apply :monkey: \n \n (But beware of the twist...:clock1: )'
+      result: 'Use command "guess <word>" to make a wordle guess! Normal wordle rules apply :monkey: \n \n(But beware of the twist...:clock1: ) \n \n Want to see todays top scores? Use "leader" to find out'
+    };
+  }
+  if (splitInput[0] === "leader" && splitInput.length === 1) {
+    return {
+      status: 200,
+      result: await listOfLeaders()
     };
   }
   return {
@@ -46329,6 +46354,12 @@ var wordleReturn = async (guess, user) => {
   const todaysDate2 = todaysDateAll2.toISOString().split("T")[0];
   const pastGuesses = await getGuesses(user, todaysDate2);
   console.log(pastGuesses.length);
+  if (pastGuesses.length > 1 && pastGuesses[pastGuesses.length - 1].guessNumber === 666) {
+    return {
+      uiOutput: pastGuesses[pastGuesses.length - 1].uiOutput,
+      previousGuessesUi: ""
+    };
+  }
   let previousGuessesUi = "";
   for (let i = 0; i < pastGuesses.length; i++) {
     previousGuessesUi += "`".concat(
@@ -46338,10 +46369,10 @@ var wordleReturn = async (guess, user) => {
       "\n \n"
     );
   }
-  const sampleTarget = await findWordOfTheDay();
+  const targetWord = await findWordOfTheDay();
   console.log("Word of the day is: ");
-  console.log(sampleTarget);
-  const targetCharacters = countCharacterOccurrence(sampleTarget);
+  console.log(targetWord);
+  const targetCharacters = countCharacterOccurrence(targetWord);
   const incorrect = ":black_circle: ";
   const defaultResponse = [
     incorrect,
@@ -46353,17 +46384,17 @@ var wordleReturn = async (guess, user) => {
   let uiOutput = "";
   let correctLetter = "";
   for (let i = 0; i < 5; i++) {
-    if (sampleTarget[i] === guess[i]) {
+    if (targetWord[i] === guess[i]) {
       defaultResponse[i] = ":large_green_circle: ";
       correctLetter += guess[i];
     }
   }
   for (let i = 0; i < 5; i++) {
-    if (sampleTarget.includes(guess[i])) {
+    if (targetWord.includes(guess[i])) {
       if (!correctLetter.includes(guess[i])) {
         defaultResponse[i] = ":large_yellow_circle: ";
         correctLetter += guess[i];
-      } else if (targetCharacters[guess[i]] > 1 && sampleTarget[i] !== guess[i]) {
+      } else if (targetCharacters[guess[i]] > 1 && targetWord[i] !== guess[i]) {
         defaultResponse[i] = ":large_yellow_circle: ";
         correctLetter += guess[i];
         targetCharacters[guess[i]] = targetCharacters[guess[i]] - 1;
@@ -46372,6 +46403,14 @@ var wordleReturn = async (guess, user) => {
     uiOutput += defaultResponse[i];
   }
   const currentGuessNumber = pastGuesses.length + 1;
+  if (currentGuessNumber > 6) {
+    uiOutput = `Guess limit has already been reached. Todays word was: ${targetWord}`;
+    return { uiOutput, previousGuessesUi };
+  }
+  if (currentGuessNumber === 6 && guess !== targetWord) {
+    uiOutput = `Guess limit has already been reached. Todays word was: ${targetWord}`;
+    return { uiOutput, previousGuessesUi };
+  }
   const guessStoring = {
     user,
     timeStamp: todaysDateAll2.toISOString(),
@@ -46381,12 +46420,12 @@ var wordleReturn = async (guess, user) => {
   };
   console.log(guessStoring);
   await storeGuess(guessStoring);
-  if (guess === sampleTarget) {
+  if (guess === targetWord) {
     const start = new Date(pastGuesses[0].timeStamp).getTime();
     const end = new Date(guessStoring.timeStamp).getTime();
     const timeDifference = Math.round((end - start) / 1e3);
     const score = Math.round(
-      guessStoring.guessNumber * 100 - 100 + timeDifference
+      guessStoring.guessNumber * 50 - 50 + timeDifference * 3
     );
     uiOutput += `
  
@@ -46395,8 +46434,43 @@ var wordleReturn = async (guess, user) => {
  :clock1: of ${timeDifference} s 
  
  Your score is: ${score}`;
+    const stopGuessingFlag = {
+      user,
+      timeStamp: todaysDateAll2.toISOString(),
+      guessNumber: 666,
+      guess: "Stop Flag",
+      uiOutput: "You already have completed todays RaphMonkey Wordle"
+    };
+    const leaderBoardStore = {
+      user: "LeaderBoard",
+      timeStamp: todaysDateAll2.toISOString(),
+      score,
+      leaderName: user,
+      targetWord
+    };
+    await storeGuess(stopGuessingFlag);
+    await storeScore(leaderBoardStore);
   }
   return { uiOutput, previousGuessesUi };
+};
+var listOfLeaders = async () => {
+  const todaysDateAll2 = new Date();
+  const todaysDate2 = todaysDateAll2.toISOString().split("T")[0];
+  const todaysScores = await getScores("LeaderBoard", todaysDate2);
+  const orderedScores = todaysScores.sort((a, b) => b.score - a.score);
+  let uiOutput = `:first_place_medal: Todays Leader Board - ${todaysDate2} 
+ 
+`;
+  for (let i = 0; i < orderedScores.length; i++) {
+    uiOutput += (i + 1).toString().concat(
+      ". ",
+      orderedScores[i].leaderName,
+      ": ",
+      orderedScores[i].score.toString(),
+      "\n \n"
+    );
+  }
+  return uiOutput;
 };
 var handler = createHandler(
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -46423,7 +46497,9 @@ var handler = createHandler(
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   getGuesses,
+  getScores,
   handler,
-  storeGuess
+  storeGuess,
+  storeScore
 });
 //# sourceMappingURL=app.js.map
