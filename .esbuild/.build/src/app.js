@@ -46240,6 +46240,16 @@ var checkInput = async (inputCommand, user) => {
       result: previousGuessesUi.concat("`", splitInput[1], ":`", uiOutput)
     };
   }
+  if (splitInput[0] === "guess" && splitInput[1].length !== 5 && splitInput.length === 2) {
+    return {
+      status: 200,
+      result: "Word length must be 5 letters. You entered ".concat(
+        "`",
+        splitInput[1],
+        "`"
+      )
+    };
+  }
   if (splitInput[0] === "create" && splitInput[1].length === 5 && splitInput.length === 2) {
     return { status: 200, result: "Wordle Created Successfully" };
   }
