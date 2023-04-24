@@ -46214,20 +46214,21 @@ var storeGuess = async (guess) => {
     TableName: config.raphGuessesTable
   });
 };
-var getGuesses = async () => {
+var getGuesses = async (user, timeStamp) => {
   const output = await ddbClient.query({
     TableName: config.raphGuessesTable,
     KeyConditionExpression: "#user = :user AND begins_with(#timeStamp, :timeStamp)",
     ExpressionAttributeNames: { "#user": "user", "#timeStamp": "timeStamp" },
     ExpressionAttributeValues: {
-      ":user": "Emma",
-      ":timeStamp": "2023-04-21"
+      ":user": user,
+      ":timeStamp": timeStamp
+      // '2023-04-24',
     }
     // Key: { user: 'Emma', timeStamp: '2023-04-21T00:57:27.600Z' },
   });
   return output.Items ?? [];
 };
-var checkInput = async (inputCommand) => {
+var checkInput = async (inputCommand, user) => {
   const splitInput = inputCommand.split(" ");
   if (splitInput[0] === "guess" && splitInput[1].length === 5 && splitInput.length === 2) {
     return {
@@ -46235,7 +46236,7 @@ var checkInput = async (inputCommand) => {
       result: "`".concat(
         splitInput[1],
         ":`",
-        await wordleReturn(splitInput[1].toLowerCase())
+        await wordleReturn(splitInput[1].toLowerCase(), user)
       )
     };
   }
@@ -46265,16 +46266,18 @@ var countCharacterOccurrence = (target) => {
   }
   return characterOccurrences;
 };
-var wordleReturn = async (guess) => {
+var wordleReturn = async (guess, user) => {
   if (!wordleValidGuess(guess)) {
     return "Not a valid guess";
   }
-  const pastGuesses = await getGuesses();
+  const todaysDateAll = new Date();
+  const todaysDate = todaysDateAll.toISOString().split("T")[0];
+  const pastGuesses = await getGuesses(user, todaysDate);
   console.log(pastGuesses.length);
   const currentGuessNumber = pastGuesses.length + 1;
   const guessStoring = {
-    user: "Emma",
-    timeStamp: new Date().toISOString(),
+    user,
+    timeStamp: todaysDateAll.toISOString(),
     guessNumber: currentGuessNumber,
     guess
   };
@@ -46329,7 +46332,10 @@ var handler = createHandler(
     const slackObject = import_querystring.default.parse(
       event.body
     );
-    const { status, result } = await checkInput(slackObject.text);
+    const { status, result } = await checkInput(
+      slackObject.text,
+      slackObject.user_name
+    );
     return {
       statusCode: status,
       body: result
