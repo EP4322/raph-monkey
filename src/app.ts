@@ -207,8 +207,8 @@ const wordleReturn = async (guess: string, user: string) => {
   }
 
   const targetWord = await findWordOfTheDay();
-  console.log('Word of the day is: ');
-  console.log(targetWord);
+  // console.log('Word of the day is: ');
+  // console.log(targetWord);
   const targetCharacters = countCharacterOccurrence(targetWord);
 
   const incorrect = ':black_circle: ';

@@ -51,9 +51,10 @@ const daily = () => {
 };
 
 const findWordOfTheDay = async () => {
-  const collectedWord = await getDailyWord();
+  let collectedWord = await getDailyWord();
   if (collectedWord.length === 0) {
     await createDailyWord();
+    collectedWord = await getDailyWord();
   }
 
   if (collectedWord.length > 1) {

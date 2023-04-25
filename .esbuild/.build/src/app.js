@@ -46245,9 +46245,10 @@ var daily = () => {
   return wordOfTheDay;
 };
 var findWordOfTheDay = async () => {
-  const collectedWord = await getDailyWord();
+  let collectedWord = await getDailyWord();
   if (collectedWord.length === 0) {
     await createDailyWord();
+    collectedWord = await getDailyWord();
   }
   if (collectedWord.length > 1) {
     console.log("ERROR");
@@ -46370,8 +46371,6 @@ var wordleReturn = async (guess, user) => {
     );
   }
   const targetWord = await findWordOfTheDay();
-  console.log("Word of the day is: ");
-  console.log(targetWord);
   const targetCharacters = countCharacterOccurrence(targetWord);
   const incorrect = ":black_circle: ";
   const defaultResponse = [
