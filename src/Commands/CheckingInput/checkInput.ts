@@ -1,4 +1,7 @@
+import { todaysDate } from 'src/app';
+
 import { listOfLeaders } from '../DynamoDB/LeaderBoard/getLeader';
+import { remainingLetters } from '../RemainingLetters/remainingLetters';
 import { wordleReturn } from '../UiOutput/uiOutput';
 
 export const checkInput = async (inputCommand: string, user: string) => {
@@ -37,7 +40,7 @@ export const checkInput = async (inputCommand: string, user: string) => {
     return {
       status: 200,
       result:
-        'Use command "guess <word>" to make a wordle guess! Normal wordle rules apply :monkey: \n \n(But beware of the twist...:clock1: ) \n \n Want to see todays top scores? Use "leader" to find out',
+        'Use command "guess <word>" to make a wordle guess! \n \n Use command "letters" to see the letters you haven\'t used. \n \n Normal wordle rules apply :monkey: \n \n(But beware of the twist...:clock1: ) \n \n Want to see todays top scores? Use "leader" to find out',
     };
   }
 
@@ -45,6 +48,13 @@ export const checkInput = async (inputCommand: string, user: string) => {
     return {
       status: 200,
       result: await listOfLeaders(),
+    };
+  }
+
+  if (splitInput[0] === 'letters' && splitInput.length === 1) {
+    return {
+      status: 200,
+      result: await remainingLetters(user, todaysDate),
     };
   }
 

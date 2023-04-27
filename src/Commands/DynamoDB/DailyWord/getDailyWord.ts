@@ -3,11 +3,11 @@ import * as fs from 'fs';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 
+import { todaysDate, todaysDateAll } from 'src/app';
+
 import { config } from '../../../config';
 import { DailyWord } from '../../../types';
 
-const todaysDateAll = new Date();
-const todaysDate = todaysDateAll.toISOString().split('T')[0];
 const ddbClient = DynamoDBDocument.from(new DynamoDBClient({}));
 
 export const createDailyWord = async (): Promise<void> => {

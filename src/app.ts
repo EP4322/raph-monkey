@@ -20,6 +20,10 @@ import { SlashCommand } from './types';
 //   await Promise.all([scoringService.smokeTest(), sendPipelineEvent({}, true)]);
 // };
 const words = fs.readFileSync('src/Assets/AcceptedWords.txt', 'utf-8');
+const todaysDateAll = new Date();
+todaysDateAll.setHours(todaysDateAll.getHours() + 7);
+export { todaysDateAll };
+export const todaysDate = todaysDateAll.toISOString().split('T')[0];
 
 export const wordleValidGuess = (guess: string) => words.includes(guess);
 

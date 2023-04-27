@@ -46124,6 +46124,8 @@ var require_dist_cjs58 = __commonJS({
 var app_exports = {};
 __export(app_exports, {
   handler: () => handler,
+  todaysDate: () => todaysDate,
+  todaysDateAll: () => todaysDateAll,
   wordleValidGuess: () => wordleValidGuess
 });
 module.exports = __toCommonJS(app_exports);
@@ -46226,11 +46228,9 @@ var getScores = async (user, timeStamp) => {
 
 // src/Commands/DynamoDB/LeaderBoard/getLeader.ts
 var listOfLeaders = async () => {
-  const todaysDateAll2 = new Date();
-  const todaysDate2 = todaysDateAll2.toISOString().split("T")[0];
-  const todaysScores = await getScores("LeaderBoard", todaysDate2);
+  const todaysScores = await getScores("LeaderBoard", todaysDate);
   const orderedScores = todaysScores.sort((a, b) => a.score - b.score);
-  let uiOutput = `:first_place_medal: Todays Leader Board - ${todaysDate2} 
+  let uiOutput = `:first_place_medal: Todays Leader Board - ${todaysDate} 
  
 `;
   for (let i = 0; i < orderedScores.length; i++) {
@@ -46245,26 +46245,59 @@ var listOfLeaders = async () => {
   return uiOutput;
 };
 
-// src/Commands/DynamoDB/DailyWord/getDailyWord.ts
-var fs = __toESM(require("fs"));
+// src/Commands/DynamoDB/Guess/guess.ts
 var import_client_dynamodb2 = __toESM(require_dist_cjs54());
 var import_lib_dynamodb2 = __toESM(require_dist_cjs58());
-var todaysDateAll = new Date();
-var todaysDate = todaysDateAll.toISOString().split("T")[0];
 var ddbClient2 = import_lib_dynamodb2.DynamoDBDocument.from(new import_client_dynamodb2.DynamoDBClient({}));
+var storeGuess = async (guess) => {
+  await ddbClient2.put({
+    Item: guess,
+    TableName: config.raphGuessesTable
+  });
+};
+var getGuesses = async (user, timeStamp) => {
+  const output = await ddbClient2.query({
+    TableName: config.raphGuessesTable,
+    KeyConditionExpression: "#user = :user AND begins_with(#timeStamp, :timeStamp)",
+    ExpressionAttributeNames: { "#user": "user", "#timeStamp": "timeStamp" },
+    ExpressionAttributeValues: {
+      ":user": user,
+      ":timeStamp": timeStamp
+    }
+  });
+  return output.Items ?? [];
+};
+
+// src/Commands/RemainingLetters/remainingLetters.ts
+var remaining = "a b c d e f g h i j k l m n o p q r s t u v w x y z ";
+var remainingLetters = async (user, timeStamp) => {
+  const guesses = await getGuesses(user, timeStamp);
+  guesses.forEach((attempt) => {
+    for (const char of attempt.guess) {
+      remaining = remaining.replace(char, "-");
+    }
+  });
+  return remaining.toUpperCase();
+};
+
+// src/Commands/DynamoDB/DailyWord/getDailyWord.ts
+var fs = __toESM(require("fs"));
+var import_client_dynamodb3 = __toESM(require_dist_cjs54());
+var import_lib_dynamodb3 = __toESM(require_dist_cjs58());
+var ddbClient3 = import_lib_dynamodb3.DynamoDBDocument.from(new import_client_dynamodb3.DynamoDBClient({}));
 var createDailyWord = async () => {
   const dailyWordStore = {
     word: daily(),
     user: "Master",
     timeStamp: todaysDateAll.toISOString()
   };
-  await ddbClient2.put({
+  await ddbClient3.put({
     Item: dailyWordStore,
     TableName: config.raphGuessesTable
   });
 };
 var getDailyWord = async () => {
-  const output = await ddbClient2.query({
+  const output = await ddbClient3.query({
     TableName: config.raphGuessesTable,
     KeyConditionExpression: "#user = :user AND begins_with(#timeStamp, :timeStamp)",
     ExpressionAttributeNames: { "#user": "user", "#timeStamp": "timeStamp" },
@@ -46293,29 +46326,6 @@ var findWordOfTheDay = async () => {
   return collectedWord[0].word;
 };
 
-// src/Commands/DynamoDB/Guess/guess.ts
-var import_client_dynamodb3 = __toESM(require_dist_cjs54());
-var import_lib_dynamodb3 = __toESM(require_dist_cjs58());
-var ddbClient3 = import_lib_dynamodb3.DynamoDBDocument.from(new import_client_dynamodb3.DynamoDBClient({}));
-var storeGuess = async (guess) => {
-  await ddbClient3.put({
-    Item: guess,
-    TableName: config.raphGuessesTable
-  });
-};
-var getGuesses = async (user, timeStamp) => {
-  const output = await ddbClient3.query({
-    TableName: config.raphGuessesTable,
-    KeyConditionExpression: "#user = :user AND begins_with(#timeStamp, :timeStamp)",
-    ExpressionAttributeNames: { "#user": "user", "#timeStamp": "timeStamp" },
-    ExpressionAttributeValues: {
-      ":user": user,
-      ":timeStamp": timeStamp
-    }
-  });
-  return output.Items ?? [];
-};
-
 // src/Commands/UiOutput/uiOutput.ts
 var wordleReturn = async (guess, user) => {
   if (!wordleValidGuess(guess)) {
@@ -46323,9 +46333,7 @@ var wordleReturn = async (guess, user) => {
     const previousGuessesUi2 = "";
     return { uiOutput: uiOutput2, previousGuessesUi: previousGuessesUi2 };
   }
-  const todaysDateAll2 = new Date();
-  const todaysDate2 = todaysDateAll2.toISOString().split("T")[0];
-  const pastGuesses = await getGuesses(user, todaysDate2);
+  const pastGuesses = await getGuesses(user, todaysDate);
   if (pastGuesses.length > 1 && pastGuesses[pastGuesses.length - 1].guessNumber === 666) {
     return {
       uiOutput: pastGuesses[pastGuesses.length - 1].uiOutput,
@@ -46383,19 +46391,23 @@ var wordleReturn = async (guess, user) => {
   }
   const guessStoring = {
     user,
-    timeStamp: todaysDateAll2.toISOString(),
+    timeStamp: todaysDateAll.toISOString(),
     guessNumber: currentGuessNumber,
     guess,
     uiOutput
   };
   await storeGuess(guessStoring);
+  let timeDifference = 0;
+  let score = 0;
   if (guess === targetWord) {
-    const start = new Date(pastGuesses[0].timeStamp).getTime();
-    const end = new Date(guessStoring.timeStamp).getTime();
-    const timeDifference = Math.round((end - start) / 1e3);
-    const score = Math.round(
-      guessStoring.guessNumber * 50 - 50 + timeDifference * 3
-    );
+    if (currentGuessNumber !== 1) {
+      const start = new Date(pastGuesses[0].timeStamp).getTime();
+      const end = new Date(guessStoring.timeStamp).getTime();
+      timeDifference = Math.round((end - start) / 1e3);
+      score = Math.round(
+        guessStoring.guessNumber * 50 - 50 + timeDifference * 3
+      );
+    }
     uiOutput += `
  
  :tada: Correct in ${currentGuessNumber} attempts 
@@ -46405,14 +46417,14 @@ var wordleReturn = async (guess, user) => {
  Your score is: ${score}`;
     const stopGuessingFlag = {
       user,
-      timeStamp: todaysDateAll2.toISOString(),
+      timeStamp: todaysDateAll.toISOString(),
       guessNumber: 666,
       guess: "Stop Flag",
       uiOutput: "You already have completed todays RaphMonkey Wordle"
     };
     const leaderBoardStore = {
       user: "LeaderBoard",
-      timeStamp: todaysDateAll2.toISOString(),
+      timeStamp: todaysDateAll.toISOString(),
       score,
       leaderName: user,
       targetWord
@@ -46449,13 +46461,27 @@ var checkInput = async (inputCommand, user) => {
   if (splitInput[0] === "help" && splitInput.length === 1) {
     return {
       status: 200,
-      result: 'Use command "guess <word>" to make a wordle guess! Normal wordle rules apply :monkey: \n \n(But beware of the twist...:clock1: ) \n \n Want to see todays top scores? Use "leader" to find out'
+      result: `Use command "guess <word>" to make a wordle guess! 
+ 
+ Use command "letters" to see the letters you haven't used. 
+ 
+ Normal wordle rules apply :monkey: 
+ 
+(But beware of the twist...:clock1: ) 
+ 
+ Want to see todays top scores? Use "leader" to find out`
     };
   }
   if (splitInput[0] === "leader" && splitInput.length === 1) {
     return {
       status: 200,
       result: await listOfLeaders()
+    };
+  }
+  if (splitInput[0] === "letters" && splitInput.length === 1) {
+    return {
+      status: 200,
+      result: await remainingLetters(user, todaysDate)
     };
   }
   return {
@@ -46474,6 +46500,9 @@ var countCharacterOccurrence = (target) => {
 
 // src/app.ts
 var words = fs2.readFileSync("src/Assets/AcceptedWords.txt", "utf-8");
+var todaysDateAll = new Date();
+todaysDateAll.setHours(todaysDateAll.getHours() + 7);
+var todaysDate = todaysDateAll.toISOString().split("T")[0];
 var wordleValidGuess = (guess) => words.includes(guess);
 var handler = createHandler(
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -46500,6 +46529,8 @@ var handler = createHandler(
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   handler,
+  todaysDate,
+  todaysDateAll,
   wordleValidGuess
 });
 //# sourceMappingURL=app.js.map

@@ -1,4 +1,4 @@
-import { wordleValidGuess } from 'src/app';
+import { todaysDate, todaysDateAll, wordleValidGuess } from 'src/app';
 import { Guess, LeaderBoard } from 'src/types';
 
 import { countCharacterOccurrence } from '../CheckingInput/checkInput';
@@ -12,9 +12,6 @@ export const wordleReturn = async (guess: string, user: string) => {
     const previousGuessesUi = '';
     return { uiOutput, previousGuessesUi };
   }
-
-  const todaysDateAll = new Date();
-  const todaysDate = todaysDateAll.toISOString().split('T')[0];
 
   const pastGuesses = await getGuesses(user, todaysDate);
   if (
@@ -95,13 +92,17 @@ export const wordleReturn = async (guess: string, user: string) => {
 
   await storeGuess(guessStoring);
 
+  let timeDifference = 0;
+  let score = 0;
   if (guess === targetWord) {
-    const start = new Date(pastGuesses[0].timeStamp).getTime();
-    const end = new Date(guessStoring.timeStamp).getTime();
-    const timeDifference = Math.round((end - start) / 1000);
-    const score = Math.round(
-      guessStoring.guessNumber * 50 - 50 + timeDifference * 3,
-    );
+    if (currentGuessNumber !== 1) {
+      const start = new Date(pastGuesses[0].timeStamp).getTime();
+      const end = new Date(guessStoring.timeStamp).getTime();
+      timeDifference = Math.round((end - start) / 1000);
+      score = Math.round(
+        guessStoring.guessNumber * 50 - 50 + timeDifference * 3,
+      );
+    }
 
     uiOutput += `\n \n :tada: Correct in ${currentGuessNumber} attempts \n \n :clock1: of ${timeDifference} s \n \n Your score is: ${score}`;
 
