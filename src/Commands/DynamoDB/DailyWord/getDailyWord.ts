@@ -3,17 +3,13 @@ import * as fs from 'fs';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 
-import { config } from './config';
+import { config } from '../../../config';
+import { DailyWord } from '../../../types';
 
 const todaysDateAll = new Date();
 const todaysDate = todaysDateAll.toISOString().split('T')[0];
 const ddbClient = DynamoDBDocument.from(new DynamoDBClient({}));
 
-interface DailyWord {
-  word: string;
-  user: 'Master';
-  timeStamp: string;
-}
 export const createDailyWord = async (): Promise<void> => {
   const dailyWordStore: DailyWord = {
     word: daily(),
@@ -35,9 +31,8 @@ export const getDailyWord = async (): Promise<DailyWord[]> => {
     ExpressionAttributeNames: { '#user': 'user', '#timeStamp': 'timeStamp' },
     ExpressionAttributeValues: {
       ':user': 'Master',
-      ':timeStamp': todaysDate, // '2023-04-24',
+      ':timeStamp': todaysDate,
     },
-    // Key: { user: 'Emma', timeStamp: '2023-04-21T00:57:27.600Z' },
   });
   return (output.Items ?? []) as DailyWord[];
 };
