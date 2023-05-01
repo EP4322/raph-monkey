@@ -26,24 +26,19 @@ export const wordleReturn = async (guess: string, user: string) => {
 
   let previousGuessesUi = '';
   for (let i = 0; i < pastGuesses.length; i++) {
-    previousGuessesUi += '`'.concat(
-      pastGuesses[i].guess,
-      ':`',
-      pastGuesses[i].uiOutput,
-      '\n \n',
-    );
+    previousGuessesUi += pastGuesses[i].uiOutput.concat('\n \n');
   }
 
   const targetWord = await findWordOfTheDay();
   const targetCharacters = countCharacterOccurrence(targetWord);
 
-  const incorrect = ':black_circle: ';
+  const incorrect = ':wordle-grey-';
   const defaultResponse = [
-    incorrect,
-    incorrect,
-    incorrect,
-    incorrect,
-    incorrect,
+    incorrect.concat(guess[0], ': '),
+    incorrect.concat(guess[1], ': '),
+    incorrect.concat(guess[2], ': '),
+    incorrect.concat(guess[3], ': '),
+    incorrect.concat(guess[4], ': '),
   ];
 
   let uiOutput = '';
@@ -51,7 +46,7 @@ export const wordleReturn = async (guess: string, user: string) => {
 
   for (let i = 0; i < 5; i++) {
     if (targetWord[i] === guess[i]) {
-      defaultResponse[i] = ':large_green_circle: ';
+      defaultResponse[i] = ':wordle-green-'.concat(guess[i], ': ');
       correctLetter += guess[i];
     }
   }
@@ -59,10 +54,10 @@ export const wordleReturn = async (guess: string, user: string) => {
   for (let i = 0; i < 5; i++) {
     if (targetWord.includes(guess[i])) {
       if (!correctLetter.includes(guess[i])) {
-        defaultResponse[i] = ':large_yellow_circle: ';
+        defaultResponse[i] = ':wordle-yellow-'.concat(guess[i], ': ');
         correctLetter += guess[i];
       } else if (targetCharacters[guess[i]] > 1 && targetWord[i] !== guess[i]) {
-        defaultResponse[i] = ':large_yellow_circle: ';
+        defaultResponse[i] = ':wordle-yellow-'.concat(guess[i], ': ');
         correctLetter += guess[i];
         targetCharacters[guess[i]] = targetCharacters[guess[i]] - 1;
       }

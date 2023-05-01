@@ -17,7 +17,7 @@ export const checkInput = async (inputCommand: string, user: string) => {
     );
     return {
       status: 200,
-      result: previousGuessesUi.concat('`', splitInput[1], ':`', uiOutput),
+      result: previousGuessesUi.concat(uiOutput),
     };
   }
 

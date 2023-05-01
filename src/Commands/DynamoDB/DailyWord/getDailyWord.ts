@@ -40,8 +40,10 @@ export const getDailyWord = async (): Promise<DailyWord[]> => {
 const daily = () => {
   const raphBotWords = fs.readFileSync('src/Assets/PossibleWords.txt', 'utf-8');
   const lineByLine = raphBotWords.split('\n');
-  const wordOfTheDay =
-    lineByLine[Math.floor(Math.random() * lineByLine.length)];
+  const randomNum = Math.floor(Math.random() * lineByLine.length);
+  const wordOfTheDay = lineByLine[randomNum];
+  const linesExceptRemoved = raphBotWords.replace(wordOfTheDay, '');
+  fs.writeFileSync('src/Assets/PossibleWords.txt', linesExceptRemoved);
   return wordOfTheDay;
 };
 

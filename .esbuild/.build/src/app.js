@@ -46311,7 +46311,10 @@ var getDailyWord = async () => {
 var daily = () => {
   const raphBotWords = fs.readFileSync("src/Assets/PossibleWords.txt", "utf-8");
   const lineByLine = raphBotWords.split("\n");
-  const wordOfTheDay = lineByLine[Math.floor(Math.random() * lineByLine.length)];
+  const randomNum = Math.floor(Math.random() * lineByLine.length);
+  const wordOfTheDay = lineByLine[randomNum];
+  const linesExceptRemoved = raphBotWords.replace(wordOfTheDay, "");
+  fs.writeFileSync("src/Assets/PossibleWords.txt", linesExceptRemoved);
   return wordOfTheDay;
 };
 var findWordOfTheDay = async () => {
@@ -46342,38 +46345,33 @@ var wordleReturn = async (guess, user) => {
   }
   let previousGuessesUi = "";
   for (let i = 0; i < pastGuesses.length; i++) {
-    previousGuessesUi += "`".concat(
-      pastGuesses[i].guess,
-      ":`",
-      pastGuesses[i].uiOutput,
-      "\n \n"
-    );
+    previousGuessesUi += pastGuesses[i].uiOutput.concat("\n \n");
   }
   const targetWord = await findWordOfTheDay();
   const targetCharacters = countCharacterOccurrence(targetWord);
-  const incorrect = ":black_circle: ";
+  const incorrect = ":wordle-grey-";
   const defaultResponse = [
-    incorrect,
-    incorrect,
-    incorrect,
-    incorrect,
-    incorrect
+    incorrect.concat(guess[0], ": "),
+    incorrect.concat(guess[1], ": "),
+    incorrect.concat(guess[2], ": "),
+    incorrect.concat(guess[3], ": "),
+    incorrect.concat(guess[4], ": ")
   ];
   let uiOutput = "";
   let correctLetter = "";
   for (let i = 0; i < 5; i++) {
     if (targetWord[i] === guess[i]) {
-      defaultResponse[i] = ":large_green_circle: ";
+      defaultResponse[i] = ":wordle-green-".concat(guess[i], ": ");
       correctLetter += guess[i];
     }
   }
   for (let i = 0; i < 5; i++) {
     if (targetWord.includes(guess[i])) {
       if (!correctLetter.includes(guess[i])) {
-        defaultResponse[i] = ":large_yellow_circle: ";
+        defaultResponse[i] = ":wordle-yellow-".concat(guess[i], ": ");
         correctLetter += guess[i];
       } else if (targetCharacters[guess[i]] > 1 && targetWord[i] !== guess[i]) {
-        defaultResponse[i] = ":large_yellow_circle: ";
+        defaultResponse[i] = ":wordle-yellow-".concat(guess[i], ": ");
         correctLetter += guess[i];
         targetCharacters[guess[i]] = targetCharacters[guess[i]] - 1;
       }
@@ -46445,7 +46443,7 @@ var checkInput = async (inputCommand, user) => {
     );
     return {
       status: 200,
-      result: previousGuessesUi.concat("`", splitInput[1], ":`", uiOutput)
+      result: previousGuessesUi.concat(uiOutput)
     };
   }
   if (splitInput[0] === "guess" && splitInput[1].length !== 5 && splitInput.length === 2) {
