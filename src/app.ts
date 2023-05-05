@@ -1,6 +1,6 @@
 import 'skuba-dive/register';
 
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import querystring from 'querystring';
 
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
@@ -19,13 +19,14 @@ import { SlashCommand } from './types';
 // const smokeTest = async () => {
 //   await Promise.all([scoringService.smokeTest(), sendPipelineEvent({}, true)]);
 // };
-const words = fs.readFileSync('src/Assets/AcceptedWords.txt', 'utf-8');
+const words = fs.readFile('src/Assets/AcceptedWords.txt', 'utf-8');
 const todaysDateAll = new Date();
 todaysDateAll.setHours(todaysDateAll.getHours() + 7);
 export { todaysDateAll };
 export const todaysDate = todaysDateAll.toISOString().split('T')[0];
 
-export const wordleValidGuess = (guess: string) => words.includes(guess);
+export const wordleValidGuess = async (guess: string): Promise<boolean> =>
+  (await words).includes(guess);
 
 export const handler = createHandler<APIGatewayProxyEventV2>(
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -37,9 +38,9 @@ export const handler = createHandler<APIGatewayProxyEventV2>(
       };
     }
 
-    const slackObject = querystring.parse(
-      event.body,
-    ) as unknown as SlashCommand;
+    const body = Buffer.from(event.body, 'base64').toString();
+    const slackObject = querystring.parse(body) as unknown as SlashCommand;
+    console.log(body);
     const { status, result } = await checkInput(
       slackObject.text,
       slackObject.user_name,

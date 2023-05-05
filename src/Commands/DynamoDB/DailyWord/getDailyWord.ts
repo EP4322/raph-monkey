@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
@@ -12,7 +12,7 @@ const ddbClient = DynamoDBDocument.from(new DynamoDBClient({}));
 
 export const createDailyWord = async (): Promise<void> => {
   const dailyWordStore: DailyWord = {
-    word: daily(),
+    word: await daily(),
     user: 'Master',
     timeStamp: todaysDateAll.toISOString(),
   };
@@ -37,13 +37,17 @@ export const getDailyWord = async (): Promise<DailyWord[]> => {
   return (output.Items ?? []) as DailyWord[];
 };
 
-const daily = () => {
-  const raphBotWords = fs.readFileSync('src/Assets/PossibleWords.txt', 'utf-8');
+const daily = async () => {
+  const raphBotWords = await fs.readFile(
+    'src/Assets/PossibleWords.txt',
+    'utf-8',
+  );
   const lineByLine = raphBotWords.split('\n');
   const randomNum = Math.floor(Math.random() * lineByLine.length);
   const wordOfTheDay = lineByLine[randomNum];
-  const linesExceptRemoved = raphBotWords.replace(wordOfTheDay, '');
-  fs.writeFileSync('src/Assets/PossibleWords.txt', linesExceptRemoved);
+  // TODO: Add to a bucket for editing. Cannot edit in deployed version.
+  // const linesExceptRemoved = raphBotWords.replace(wordOfTheDay, '');
+  // await fs.writeFile('src/Assets/PossibleWords.txt', linesExceptRemoved);
   return wordOfTheDay;
 };
 

@@ -81,6 +81,9 @@ functions:
 
     events:
       - httpApi: 'POST /invoke'
+    package:
+      patterns:
+        - 'src/Assets/*.txt'
   WorkerPreHook:
     name: ${self:functions.Worker.name}-pre-hook
     handler: lib/hooks.pre
@@ -115,6 +118,21 @@ resources:
             KeyType: HASH
           - AttributeName: timeStamp
             KeyType: RANGE
+    # words:
+    #   Type: AWS::DynamoDB::Table
+    #   Properties:
+    #     TableName: raph-words
+    #     BillingMode: PAY_PER_REQUEST
+    #     AttributeDefinitions:
+    #       - AttributeName: word
+    #         AttributeType: S
+    #       - AttributeName: type
+    #         AttributeType: S
+    #     KeySchema:
+    #       - AttributeName: word
+    #         KeyType: HASH
+    #       - AttributeName: type
+    #         KeyType: RANGE
 
 package:
   individually: true

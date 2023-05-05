@@ -7,7 +7,7 @@ import { getGuesses, storeGuess } from '../DynamoDB/Guess/guess';
 import { storeScore } from '../DynamoDB/LeaderBoard/scoring';
 
 export const wordleReturn = async (guess: string, user: string) => {
-  if (!wordleValidGuess(guess)) {
+  if (!(await wordleValidGuess(guess))) {
     const uiOutput = 'Not a valid guess';
     const previousGuessesUi = '';
     return { uiOutput, previousGuessesUi };
