@@ -20,10 +20,12 @@ import { SlashCommand } from './types';
 //   await Promise.all([scoringService.smokeTest(), sendPipelineEvent({}, true)]);
 // };
 const words = fs.readFile('src/Assets/AcceptedWords.txt', 'utf-8');
-const todaysDateAll = new Date();
-todaysDateAll.setHours(todaysDateAll.getHours() + 7);
-export { todaysDateAll };
-export const todaysDate = todaysDateAll.toISOString().split('T')[0];
+export const todaysDateAll = () => {
+  const date = new Date();
+  date.setHours(date.getHours() + 7);
+  return date;
+};
+export const todaysDate = todaysDateAll().toISOString().split('T')[0];
 
 export const wordleValidGuess = async (guess: string): Promise<boolean> =>
   (await words).includes(guess);
@@ -40,7 +42,6 @@ export const handler = createHandler<APIGatewayProxyEventV2>(
 
     const body = Buffer.from(event.body, 'base64').toString();
     const slackObject = querystring.parse(body) as unknown as SlashCommand;
-    console.log(body);
     const { status, result } = await checkInput(
       slackObject.text,
       slackObject.user_name,

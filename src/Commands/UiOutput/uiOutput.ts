@@ -79,7 +79,7 @@ export const wordleReturn = async (guess: string, user: string) => {
 
   const guessStoring: Guess = {
     user,
-    timeStamp: todaysDateAll.toISOString(),
+    timeStamp: todaysDateAll().toISOString(),
     guessNumber: currentGuessNumber,
     guess,
     uiOutput,
@@ -103,7 +103,7 @@ export const wordleReturn = async (guess: string, user: string) => {
 
     const stopGuessingFlag: Guess = {
       user,
-      timeStamp: todaysDateAll.toISOString(),
+      timeStamp: todaysDateAll().toISOString(),
       guessNumber: 666,
       guess: 'Stop Flag',
       uiOutput: 'You already have completed todays RaphMonkey Wordle',
@@ -111,7 +111,7 @@ export const wordleReturn = async (guess: string, user: string) => {
 
     const leaderBoardStore: LeaderBoard = {
       user: 'LeaderBoard',
-      timeStamp: todaysDateAll.toISOString(),
+      timeStamp: todaysDateAll().toISOString(),
       score,
       leaderName: user,
       targetWord,

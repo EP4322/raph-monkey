@@ -14,7 +14,7 @@ export const createDailyWord = async (): Promise<void> => {
   const dailyWordStore: DailyWord = {
     word: await daily(),
     user: 'Master',
-    timeStamp: todaysDateAll.toISOString(),
+    timeStamp: todaysDateAll().toISOString(),
   };
 
   await ddbClient.put({
