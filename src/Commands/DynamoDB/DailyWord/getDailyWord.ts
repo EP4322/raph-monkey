@@ -60,6 +60,7 @@ const findWordOfTheDay = async () => {
 
   if (collectedWord.length > 1) {
     // TODO: Add Error Handling
+    // eslint-disable-next-line no-console
     console.log('ERROR');
   }
 

@@ -22,9 +22,10 @@ export const checkInput = async (inputCommand: string, user: string) => {
   }
 
   if (
-    splitInput[0] === 'guess' &&
-    splitInput[1].length !== 5 &&
-    splitInput.length === 2
+    splitInput[0] === 'guess' ||
+    (splitInput[0] === 'g' &&
+      splitInput[1].length !== 5 &&
+      splitInput.length === 2)
   ) {
     return {
       status: 200,
@@ -44,7 +45,11 @@ export const checkInput = async (inputCommand: string, user: string) => {
     };
   }
 
-  if (splitInput[0] === 'leader' && splitInput.length === 1) {
+  if (
+    splitInput[0] === 'leader' ||
+    splitInput[0] === 'score' ||
+    (splitInput[0] === 'scoreboard' && splitInput.length === 1)
+  ) {
     return {
       status: 200,
       result: await listOfLeaders(),
