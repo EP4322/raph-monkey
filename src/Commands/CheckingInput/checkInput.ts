@@ -22,10 +22,9 @@ export const checkInput = async (inputCommand: string, user: string) => {
   }
 
   if (
-    splitInput[0] === 'guess' ||
-    (splitInput[0] === 'g' &&
-      splitInput[1].length !== 5 &&
-      splitInput.length === 2)
+    (splitInput[0] === 'guess' || splitInput[0] === 'g') &&
+    splitInput[1].length !== 5 &&
+    splitInput.length === 2
   ) {
     return {
       status: 200,
