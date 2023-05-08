@@ -7,7 +7,7 @@ import { wordleReturn } from '../UiOutput/uiOutput';
 export const checkInput = async (inputCommand: string, user: string) => {
   const splitInput = inputCommand.split(' ');
   if (
-    splitInput[0] === 'guess' &&
+    (splitInput[0] === 'guess' || splitInput[0] === 'g') &&
     splitInput[1].length === 5 &&
     splitInput.length === 2
   ) {
